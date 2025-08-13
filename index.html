@@ -453,7 +453,9 @@
             
             async connectWallet() {
                 console.log('Opening wallet selection modal...');
+                // Always show the wallet selection modal first (like Hybra)
                 this.showWalletSelectionModal();
+                return false; // Prevent any automatic connection
             }
             
             showWalletSelectionModal() {
@@ -477,25 +479,31 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
                             <button onclick="window.wallet.connectRainbow()" 
                                     style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
-                                <div style="width: 48px; height: 48px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">🌈</div>
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF9saW5lYXJfMV8xIiB4MT0iMCIgeTE9IjAiIHgyPSI0OCIgeTI9IjQ4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNGRjY5NDIiLz4KPHN0b3Agb2Zmc2V0PSIwLjI1IiBzdG9wLWNvbG9yPSIjRkY0RTkyIi8+CjxzdG9wIG9mZnNldD0iMC41IiBzdG9wLWNvbG9yPSIjRkY2QkZGIi8+CjxzdG9wIG9mZnNldD0iMC43NSIgc3RvcC1jb2xvcj0iIzk5NEVGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0OUE5RkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K" alt="Rainbow" style="width: 48px; height: 48px;">
                                 <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Rainbow</span>
                             </button>
                             
                             <button onclick="window.wallet.connectCoinbase()" 
                                     style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
-                                <div style="width: 48px; height: 48px; background: #0052ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">CB</div>
+                                <div style="width: 48px; height: 48px; background: #0052ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"/><path d="M15.5 12C15.5 13.933 13.933 15.5 12 15.5C10.067 15.5 8.5 13.933 8.5 12C8.5 10.067 10.067 8.5 12 8.5C13.933 8.5 15.5 10.067 15.5 12Z" fill="white"/></svg>
+                                </div>
                                 <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Coinbase</span>
                             </button>
                             
                             <button onclick="window.wallet.connectMetaMask()" 
                                     style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
-                                <div style="width: 48px; height: 48px; background: #f6851b; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">🦊</div>
+                                <div style="width: 48px; height: 48px; background: #f6851b; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M22.46 14.22l-.07.18-.43 1.07-.15.37-.38.97-.19.48-.5 1.24-.27.67-.86 2.14h-.01l-.86-2.14-.27-.67-.5-1.24-.19-.48-.38-.97-.15-.37-.43-1.07-.07-.18L15.81 9l-.32-.8L12 0 8.51 8.2l-.32.8-1.73 5.22-.07.18-.43 1.07-.15.37-.38.97-.19.48-.5 1.24-.27.67-.86 2.14h-.01l-.86-2.14-.27-.67-.5-1.24-.19-.48-.38-.97-.15-.37-.43-1.07-.07-.18L8.19 9l-.32-.8L12 0l3.49 8.2l.32.8 1.73 5.22z"/></svg>
+                                </div>
                                 <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">MetaMask</span>
                             </button>
                             
                             <button onclick="window.wallet.connectWalletConnect()" 
                                     style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
-                                <div style="width: 48px; height: 48px; background: #3b99fc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">🔗</div>
+                                <div style="width: 48px; height: 48px; background: #3b99fc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.75L12 17.25L19.5 9.75H4.5Z"/><path d="M12 2.25L4.5 9.75H19.5L12 2.25Z"/></svg>
+                                </div>
                                 <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">WalletConnect</span>
                             </button>
                         </div>
@@ -776,9 +784,9 @@
             async connectRainbow() {
                 document.querySelector('.modal-overlay')?.remove();
                 
-                // Check if Rainbow is injected
+                // Check if Rainbow is injected first
                 if (window.ethereum && window.ethereum.isRainbow) {
-                    console.log('Rainbow detected, connecting...');
+                    console.log('Rainbow detected, connecting directly...');
                     return await this.connectDirectly();
                 }
                 
@@ -792,7 +800,7 @@
                     }
                 }
                 
-                // Fallback to WalletConnect
+                // If Rainbow not detected, use WalletConnect
                 console.log('Rainbow not detected, using WalletConnect...');
                 return await this.connectWithWalletConnect();
             }
