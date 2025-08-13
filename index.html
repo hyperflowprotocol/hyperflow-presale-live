@@ -343,22 +343,18 @@
             async connectWallet() {
                 console.log('Attempting wallet connection...');
                 
-                // Wait for wallet providers to load - this is critical for Rainbow
-                await this.waitForWalletProvider();
-                
-                // Try direct connection
-                try {
-                    const result = await this.connectDirectly();
-                    if (result) {
-                        return true;
+                // First try direct injection (desktop browsers with extensions)
+                if (window.ethereum) {
+                    try {
+                        return await this.connectDirectly();
+                    } catch (error) {
+                        console.log('Direct connection failed:', error.message);
                     }
-                } catch (error) {
-                    console.log('Connection failed:', error.message);
                 }
                 
-                // Show Rainbow deep link as fallback
-                this.showRainbowConnection();
-                return false;
+                // For mobile or no injection, use WalletConnect (this is what works)
+                console.log('Using WalletConnect for Rainbow connection...');
+                return await this.connectWithWalletConnect();
             }
             
             async waitForWalletProvider(maxWait = 3000) {
@@ -547,9 +543,65 @@
                 return false;
             }
             
+            async connectWithWalletConnect() {
+                try {
+                    if (!this.web3Modal) {
+                        this.showMessage('WalletConnect not initialized', 'error');
+                        return false;
+                    }
+                    
+                    console.log('Opening WalletConnect modal...');
+                    const provider = await this.web3Modal.open();
+                    
+                    if (provider) {
+                        this.web3 = new Web3(provider);
+                        const accounts = await this.web3.eth.getAccounts();
+                        
+                        if (accounts && accounts.length > 0) {
+                            this.account = accounts[0];
+                            
+                            // Listen for account changes
+                            provider.on('accountsChanged', (accounts) => {
+                                if (accounts.length === 0) {
+                                    this.disconnectWallet();
+                                } else {
+                                    this.account = accounts[0];
+                                    this.updateConnectedUI();
+                                }
+                            });
+                            
+                            // Listen for chain changes
+                            provider.on('chainChanged', () => {
+                                window.location.reload();
+                            });
+                            
+                            // Listen for disconnect
+                            provider.on('disconnect', () => {
+                                this.disconnectWallet();
+                            });
+                            
+                            console.log('WalletConnect connected to:', this.account);
+                            this.updateConnectedUI();
+                            this.showMessage('Wallet connected successfully!', 'success');
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.error('WalletConnect error:', error);
+                    if (error.message.includes('User rejected')) {
+                        this.showMessage('Connection cancelled by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect: ' + error.message, 'error');
+                    }
+                    return false;
+                }
+            }
+            
             showSimpleConnectionOptions() {
-                // Show Rainbow connection options
-                this.showRainbowConnection();
+                // This should not be called anymore
+                this.connectWithWalletConnect();
             }
             
             async connectBrowserWallet() {
