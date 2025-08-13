@@ -1,5 +1,8 @@
 {
   "name": "hyperflow-presale-live",
+  "env": {
+    "WALLETCONNECT_PROJECT_ID": "ca21cf0275758f8258a17ae99f6148d4"
+  },
   "headers": [
     {
       "source": "/(.*)",
