@@ -424,39 +424,95 @@
                 throw new Error('All connection methods failed');
             }
             
-            showSimpleConnectionOptions() {
+            showDebugInfo() {
+                const debugInfo = {
+                    userAgent: navigator.userAgent,
+                    hasEthereum: typeof window.ethereum !== 'undefined',
+                    hasWeb3: typeof window.web3 !== 'undefined',
+                    ethereumMethods: window.ethereum ? Object.getOwnPropertyNames(window.ethereum) : [],
+                    web3Methods: window.web3 ? Object.getOwnPropertyNames(window.web3) : [],
+                    allEthProps: Object.keys(window).filter(k => k.toLowerCase().includes('eth'))
+                };
+                
                 const modal = document.createElement('div');
                 modal.style.cssText = `
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    background: rgba(0,0,0,0.9); z-index: 10000;
                     display: flex; justify-content: center; align-items: center;
+                    overflow-y: auto;
                 `;
                 
                 modal.innerHTML = `
-                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
-                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect Your Wallet</h3>
-                        <p style="color: white; margin-bottom: 20px;">Open this page directly in your wallet's browser for the best experience:</p>
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 500px; text-align: left;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px; text-align: center;">Wallet Debug Info</h3>
                         
-                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
-                            <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
-                                Copy this link and open it in your wallet app:
-                                <br><strong style="color: white;">https://hyperflow-presale-live-shal.vercel.app</strong>
-                            </div>
-                            
-                            <button onclick="navigator.clipboard.writeText('https://hyperflow-presale-live-shal.vercel.app')" 
-                                   style="padding: 12px 24px; background: #2dd4bf; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Copy Link
-                            </button>
+                        <div style="color: white; font-family: monospace; font-size: 12px; background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; overflow-x: auto;">
+                            <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
                         </div>
                         
-                        <button onclick="this.parentElement.parentElement.remove()" 
-                                style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                            Close
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <button onclick="window.wallet.forceConnection()" 
+                                   style="padding: 12px 24px; background: #2dd4bf; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Force Connect Attempt
+                            </button>
+                            
+                            <button onclick="navigator.clipboard.writeText(JSON.stringify(${JSON.stringify(debugInfo)}, null, 2))" 
+                                   style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Copy Debug Info
+                            </button>
+                            
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                                    style="padding: 12px 24px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Close
+                            </button>
+                        </div>
                     </div>
                 `;
                 
                 document.body.appendChild(modal);
+            }
+            
+            async forceConnection() {
+                console.log('FORCE CONNECTION ATTEMPT');
+                
+                // Try the most aggressive connection methods
+                const aggressiveMethods = [
+                    // Direct ethereum request
+                    () => window.ethereum?.request?.({ method: 'eth_requestAccounts' }),
+                    // Legacy enable
+                    () => window.ethereum?.enable?.(),
+                    // Web3 enable
+                    () => window.web3?.eth?.requestAccounts?.(),
+                    // Direct provider access
+                    () => window.ethereum?.send?.('eth_requestAccounts'),
+                ];
+                
+                for (let i = 0; i < aggressiveMethods.length; i++) {
+                    try {
+                        console.log(`Trying aggressive method ${i + 1}`);
+                        const result = await aggressiveMethods[i]();
+                        console.log(`Method ${i + 1} result:`, result);
+                        
+                        if (result && (Array.isArray(result) ? result.length > 0 : result)) {
+                            const accounts = Array.isArray(result) ? result : [result];
+                            this.account = accounts[0];
+                            this.web3 = new Web3(window.ethereum || window.web3.currentProvider);
+                            this.updateConnectedUI();
+                            this.showMessage('Force connection successful!', 'success');
+                            return true;
+                        }
+                    } catch (error) {
+                        console.log(`Aggressive method ${i + 1} failed:`, error);
+                    }
+                }
+                
+                this.showMessage('All connection methods failed', 'error');
+                return false;
+            }
+            
+            showSimpleConnectionOptions() {
+                // Show debug info instead of simple connection
+                this.showDebugInfo();
             }
             
             async connectBrowserWallet() {
