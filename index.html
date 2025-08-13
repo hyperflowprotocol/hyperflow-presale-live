@@ -341,70 +341,87 @@
             }
             
             async connectWallet() {
-                console.log('Attempting direct wallet connection...');
+                console.log('=== WALLET CONNECTION DEBUG ===');
+                console.log('User agent:', navigator.userAgent);
+                console.log('Window ethereum:', typeof window.ethereum, window.ethereum);
+                console.log('Window web3:', typeof window.web3, window.web3);
+                console.log('All window properties containing "eth":', Object.keys(window).filter(k => k.toLowerCase().includes('eth')));
                 
-                // Wait a moment for providers to load
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                // Check for any injected providers
-                const hasEthereum = typeof window.ethereum !== 'undefined';
-                const hasWeb3 = typeof window.web3 !== 'undefined';
-                
-                console.log('Provider check:', { hasEthereum, hasWeb3, ethereum: window.ethereum });
-                
-                if (hasEthereum || hasWeb3) {
-                    console.log('Wallet provider found, connecting directly...');
-                    return await this.connectDirectly();
+                // Always try direct connection first
+                try {
+                    console.log('Attempting direct connection...');
+                    const result = await this.connectDirectly();
+                    if (result) {
+                        console.log('Direct connection successful');
+                        return true;
+                    }
+                } catch (error) {
+                    console.log('Direct connection failed:', error.message);
                 }
                 
-                // If no provider detected, show simple instructions
-                console.log('No wallet provider detected');
+                // If direct connection fails, show fallback
+                console.log('Showing fallback options');
                 this.showSimpleConnectionOptions();
                 return false;
             }
             
             async connectDirectly() {
-                try {
-                    console.log('Connecting directly to wallet...');
+                console.log('=== DIRECT CONNECTION ATTEMPT ===');
+                
+                // Try multiple connection methods
+                const methods = [
+                    // Method 1: Modern ethereum.request
+                    async () => {
+                        if (window.ethereum && window.ethereum.request) {
+                            console.log('Trying ethereum.request method');
+                            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                            return { accounts, provider: window.ethereum };
+                        }
+                        throw new Error('No ethereum.request available');
+                    },
                     
-                    // Use the available provider
-                    const provider = window.ethereum || window.web3?.currentProvider;
-                    if (!provider) {
-                        throw new Error('No wallet provider available');
+                    // Method 2: Legacy web3
+                    async () => {
+                        if (window.web3 && window.web3.eth) {
+                            console.log('Trying legacy web3 method');
+                            const accounts = await window.web3.eth.getAccounts();
+                            return { accounts, provider: window.web3.currentProvider };
+                        }
+                        throw new Error('No web3.eth available');
+                    },
+                    
+                    // Method 3: Direct ethereum enable
+                    async () => {
+                        if (window.ethereum && window.ethereum.enable) {
+                            console.log('Trying ethereum.enable method');
+                            const accounts = await window.ethereum.enable();
+                            return { accounts, provider: window.ethereum };
+                        }
+                        throw new Error('No ethereum.enable available');
                     }
-                    
-                    // Request account access
-                    let accounts;
-                    if (window.ethereum && window.ethereum.request) {
-                        accounts = await window.ethereum.request({ 
-                            method: 'eth_requestAccounts' 
-                        });
-                    } else if (window.web3 && window.web3.eth) {
-                        accounts = await window.web3.eth.getAccounts();
-                    } else {
-                        throw new Error('Cannot access wallet accounts');
-                    }
-                    
-                    if (accounts && accounts.length > 0) {
-                        this.account = accounts[0];
-                        this.web3 = new Web3(provider);
+                ];
+                
+                for (let i = 0; i < methods.length; i++) {
+                    try {
+                        console.log(`Attempting connection method ${i + 1}`);
+                        const { accounts, provider } = await methods[i]();
                         
-                        console.log('Connected to:', this.account);
-                        this.updateConnectedUI();
-                        this.showMessage('Wallet connected successfully!', 'success');
-                        return true;
-                    } else {
-                        throw new Error('No accounts available');
+                        if (accounts && accounts.length > 0) {
+                            this.account = accounts[0];
+                            this.web3 = new Web3(provider);
+                            
+                            console.log('Successfully connected to:', this.account);
+                            this.updateConnectedUI();
+                            this.showMessage('Wallet connected successfully!', 'success');
+                            return true;
+                        }
+                    } catch (error) {
+                        console.log(`Method ${i + 1} failed:`, error.message);
+                        continue;
                     }
-                } catch (error) {
-                    console.error('Direct connection error:', error);
-                    if (error.code === 4001) {
-                        this.showMessage('Connection rejected by user', 'error');
-                    } else {
-                        this.showMessage('Failed to connect wallet: ' + error.message, 'error');
-                    }
-                    return false;
                 }
+                
+                throw new Error('All connection methods failed');
             }
             
             showSimpleConnectionOptions() {
