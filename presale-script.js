@@ -63,8 +63,22 @@ class HyperFlowPresale {
     }
 
     async connectWallet() {
-        // Show wallet selection modal
-        this.showWalletModal();
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+            // On mobile, check for wallet apps first
+            if (typeof window.ethereum !== 'undefined') {
+                // Mobile has a wallet browser/app
+                this.connectMetaMask();
+            } else {
+                // No wallet detected, show mobile-specific connection
+                this.connectMobileWallet();
+            }
+        } else {
+            // Desktop - show modal
+            this.showWalletModal();
+        }
     }
 
     showWalletModal() {
@@ -95,6 +109,47 @@ class HyperFlowPresale {
             </div>
         `;
         document.body.appendChild(modal);
+    }
+
+    async connectMobileWallet() {
+        // Create mobile wallet connection options
+        const mobileModal = document.createElement('div');
+        mobileModal.className = 'wallet-modal';
+        mobileModal.innerHTML = `
+            <div class="wallet-modal-content">
+                <div class="wallet-modal-header">
+                    <h3>Connect Mobile Wallet</h3>
+                    <button class="wallet-modal-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                </div>
+                <div class="mobile-wallet-instructions">
+                    <p>Choose your preferred wallet:</p>
+                    <div class="mobile-wallet-links">
+                        <a href="https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}" class="mobile-wallet-link">
+                            <span class="wallet-icon">🦊</span>
+                            <span>Open in MetaMask</span>
+                        </a>
+                        <a href="https://link.trustwallet.com/open_url?coin_id=60&url=${encodeURIComponent(window.location.href)}" class="mobile-wallet-link">
+                            <span class="wallet-icon">🛡️</span>
+                            <span>Open in Trust Wallet</span>
+                        </a>
+                        <a href="https://rainbow.me" class="mobile-wallet-link">
+                            <span class="wallet-icon">🌈</span>
+                            <span>Open in Rainbow</span>
+                        </a>
+                        <a href="https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}" class="mobile-wallet-link">
+                            <span class="wallet-icon">🔵</span>
+                            <span>Open in Coinbase Wallet</span>
+                        </a>
+                    </div>
+                    <div class="mobile-wallet-qr">
+                        <button onclick="window.presale.connectWalletConnect()" class="qr-button">
+                            📱 Show QR Code for Other Wallets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(mobileModal);
     }
 
     async connectMetaMask() {
