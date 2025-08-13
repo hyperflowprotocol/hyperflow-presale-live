@@ -4,6 +4,8 @@ class HyperFlowPresale {
     constructor() {
         this.web3 = null;
         this.account = null;
+        this.provider = null;
+        this.walletConnectProvider = null;
         this.presaleData = {
             hardCap: 2000,
             tokensPerHype: 25000, // 1 HYPE = 25,000 FLOW tokens
@@ -61,15 +63,53 @@ class HyperFlowPresale {
     }
 
     async connectWallet() {
+        // Show wallet selection modal
+        this.showWalletModal();
+    }
+
+    showWalletModal() {
+        const modal = document.createElement('div');
+        modal.className = 'wallet-modal';
+        modal.innerHTML = `
+            <div class="wallet-modal-content">
+                <div class="wallet-modal-header">
+                    <h3>Connect Your Wallet</h3>
+                    <button class="wallet-modal-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
+                </div>
+                <div class="wallet-options">
+                    <button class="wallet-option" onclick="window.presale.connectMetaMask()">
+                        <div class="wallet-icon">🦊</div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">MetaMask</div>
+                            <div class="wallet-desc">Browser Extension</div>
+                        </div>
+                    </button>
+                    <button class="wallet-option" onclick="window.presale.connectWalletConnect()">
+                        <div class="wallet-icon">📱</div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">WalletConnect</div>
+                            <div class="wallet-desc">Mobile Wallets</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    async connectMetaMask() {
         if (typeof window.ethereum !== 'undefined') {
             try {
                 const accounts = await window.ethereum.request({ 
                     method: 'eth_requestAccounts' 
                 });
                 
+                this.provider = window.ethereum;
+                this.web3 = new Web3(window.ethereum);
                 this.account = accounts[0];
-                this.updateWalletStatus(true);
+                this.updateWalletStatus(true, 'MetaMask');
                 this.showPresaleForm();
+                this.closeModal();
                 
                 // Listen for account changes
                 window.ethereum.on('accountsChanged', (accounts) => {
@@ -77,37 +117,108 @@ class HyperFlowPresale {
                         this.disconnectWallet();
                     } else {
                         this.account = accounts[0];
-                        this.updateWalletStatus(true);
+                        this.updateWalletStatus(true, 'MetaMask');
                     }
                 });
                 
             } catch (error) {
-                console.error('Error connecting wallet:', error);
-                this.showError('Failed to connect wallet. Please try again.');
+                console.error('Error connecting MetaMask:', error);
+                this.showError('Failed to connect MetaMask. Please try again.');
             }
         } else {
-            this.showError('Please install MetaMask or another Web3 wallet to participate.');
+            this.showError('MetaMask not detected. Please install MetaMask extension.');
+        }
+    }
+
+    async connectWalletConnect() {
+        try {
+            // Initialize WalletConnect provider
+            this.walletConnectProvider = new WalletConnectProvider.default({
+                projectId: "YOUR_REOWN_PROJECT_ID", // Replace with your Reown Project ID
+                rpc: {
+                    1: "https://mainnet.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
+                    5: "https://goerli.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
+                    11155111: "https://sepolia.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0"
+                },
+                chainId: 1,
+                qrcodeModalOptions: {
+                    mobileLinks: [
+                        "metamask",
+                        "trust",
+                        "rainbow",
+                        "argent",
+                        "coinbase",
+                        "imtoken",
+                        "pillar"
+                    ]
+                }
+            });
+
+            // Enable session (triggers QR Code modal)
+            const accounts = await this.walletConnectProvider.enable();
+            
+            this.provider = this.walletConnectProvider;
+            this.web3 = new Web3(this.walletConnectProvider);
+            this.account = accounts[0];
+            this.updateWalletStatus(true, 'WalletConnect');
+            this.showPresaleForm();
+            this.closeModal();
+
+            // Listen for account changes
+            this.walletConnectProvider.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    this.disconnectWallet();
+                } else {
+                    this.account = accounts[0];
+                    this.updateWalletStatus(true, 'WalletConnect');
+                }
+            });
+
+            // Listen for disconnection
+            this.walletConnectProvider.on('disconnect', () => {
+                this.disconnectWallet();
+            });
+
+        } catch (error) {
+            console.error('Error connecting WalletConnect:', error);
+            this.showError('Failed to connect via WalletConnect. Please try again.');
+        }
+    }
+
+    closeModal() {
+        const modal = document.querySelector('.wallet-modal');
+        if (modal) {
+            modal.remove();
         }
     }
 
     disconnectWallet() {
+        // Disconnect WalletConnect if active
+        if (this.walletConnectProvider && this.walletConnectProvider.connected) {
+            this.walletConnectProvider.disconnect();
+        }
+        
         this.account = null;
+        this.provider = null;
+        this.web3 = null;
+        this.walletConnectProvider = null;
         this.updateWalletStatus(false);
         this.hidePresaleForm();
     }
 
-    updateWalletStatus(connected) {
+    updateWalletStatus(connected, walletType = '') {
         const walletStatus = document.getElementById('walletStatus');
         const connectButton = document.getElementById('connectWallet');
         
         if (connected && this.account) {
+            const walletTypeText = walletType ? ` via ${walletType}` : '';
             walletStatus.innerHTML = `
                 <div class="status-connected">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="2"/>
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                     </svg>
-                    <span>Connected: ${this.account.substring(0, 6)}...${this.account.substring(38)}</span>
+                    <span>Connected${walletTypeText}: ${this.account.substring(0, 6)}...${this.account.substring(38)}</span>
                 </div>
             `;
             connectButton.textContent = 'Disconnect Wallet';
