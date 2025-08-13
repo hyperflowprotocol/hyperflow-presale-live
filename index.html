@@ -328,94 +328,103 @@
         </div>
     </footer>
 
-    <!-- Reown AppKit SDK -->
-    <script src="https://unpkg.com/@reown/appkit@1.0.0/dist/index.js"></script>
-    <script src="https://unpkg.com/@reown/appkit-adapter-ethers@1.0.0/dist/index.js"></script>
+    <!-- RainbowKit SDK -->
+    <script src="https://unpkg.com/@rainbow-me/rainbowkit@2.0.0/dist/index.js"></script>
+    <script src="https://unpkg.com/wagmi@2.0.0/dist/index.js"></script>
+    <script src="https://unpkg.com/viem@2.0.0/dist/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@rainbow-me/rainbowkit@2.0.0/styles.css" />
     
     <script>
-        console.log('Loading Reown AppKit wallet connection...');
+        console.log('Loading RainbowKit wallet connection...');
         
-        class ReownWalletConnect {
+        class RainbowWalletConnect {
             constructor() {
                 this.account = null;
-                this.modal = null;
+                this.provider = null;
                 this.projectId = 'ca21cf0275758f8258a17ae99f6148d4';
             }
             
             async init() {
                 try {
-                    console.log('Initializing Reown AppKit...');
+                    console.log('Initializing RainbowKit...');
                     
-                    // Initialize Reown AppKit
-                    this.modal = ReownAppKit.createAppKit({
-                        projectId: this.projectId,
-                        networks: [
-                            {
-                                id: 1,
-                                name: 'Ethereum',
-                                nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-                                rpcUrls: { 
-                                    default: { http: ['https://cloudflare-eth.com'] },
-                                    public: { http: ['https://cloudflare-eth.com'] }
-                                },
-                                blockExplorers: {
-                                    default: { name: 'Etherscan', url: 'https://etherscan.io' }
-                                }
-                            }
-                        ],
-                        metadata: {
-                            name: 'HyperFlow Protocol',
-                            description: 'Advanced DeFi Infrastructure for HyperEVM',
-                            url: 'https://hyperflow-presale-live-shal.vercel.app',
-                            icons: ['https://hyperflow-presale-live-shal.vercel.app/hyperflow_logo.svg']
+                    // Define chains
+                    const mainnet = {
+                        id: 1,
+                        name: 'Ethereum',
+                        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                        rpcUrls: { 
+                            default: { http: ['https://cloudflare-eth.com'] },
+                            public: { http: ['https://cloudflare-eth.com'] }
                         },
-                        featuredWalletIds: [
-                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow (prioritized)
-                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
-                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa'  // Coinbase
-                        ]
+                        blockExplorers: {
+                            default: { name: 'Etherscan', url: 'https://etherscan.io' }
+                        }
+                    };
+                    
+                    // Create connector with Rainbow prioritized
+                    const connectors = RainbowKit.connectorsForWallets([
+                        {
+                            groupName: 'Recommended',
+                            wallets: [
+                                RainbowKit.rainbowWallet({ projectId: this.projectId, chains: [mainnet] }),
+                                RainbowKit.metaMaskWallet({ projectId: this.projectId, chains: [mainnet] }),
+                                RainbowKit.coinbaseWallet({ appName: 'HyperFlow Protocol', chains: [mainnet] }),
+                                RainbowKit.walletConnectWallet({ projectId: this.projectId, chains: [mainnet] })
+                            ]
+                        }
+                    ], {
+                        appName: 'HyperFlow Protocol',
+                        projectId: this.projectId
                     });
                     
-                    // Subscribe to account changes
-                    this.modal.subscribeAccount((account) => {
-                        console.log('Account changed:', account);
-                        if (account.isConnected) {
-                            this.account = account.address;
-                            this.updateConnectedUI();
-                        } else {
-                            this.account = null;
-                            this.updateDisconnectedUI();
+                    // Create Wagmi config
+                    this.config = Wagmi.createConfig({
+                        connectors,
+                        chains: [mainnet],
+                        transports: {
+                            [mainnet.id]: Wagmi.http('https://cloudflare-eth.com')
                         }
                     });
                     
-                    console.log('Reown AppKit initialized successfully');
+                    // Initialize RainbowKit provider
+                    this.rainbowKitProvider = RainbowKit.RainbowKitProvider({
+                        chains: [mainnet],
+                        config: this.config,
+                        appInfo: {
+                            appName: 'HyperFlow Protocol',
+                            disclaimer: 'Advanced DeFi Infrastructure for HyperEVM'
+                        }
+                    });
+                    
+                    console.log('RainbowKit initialized successfully');
                 } catch (error) {
-                    console.error('Failed to initialize Reown AppKit:', error);
-                    // Fallback to simple wallet detection
+                    console.error('Failed to initialize RainbowKit:', error);
                     return this.fallbackConnect();
                 }
             }
             
             async connectWallet() {
-                console.log('Attempting wallet connection...');
-                
-                if (!this.modal) {
-                    await this.init();
-                }
+                console.log('Attempting Rainbow wallet connection...');
                 
                 try {
-                    // Open Reown AppKit modal
-                    await this.modal.open();
-                    return true;
+                    // Check if RainbowKit is available
+                    if (typeof RainbowKit !== 'undefined' && RainbowKit.openConnectModal) {
+                        // Open RainbowKit connect modal
+                        RainbowKit.openConnectModal();
+                        return true;
+                    } else {
+                        console.log('RainbowKit not available, using fallback');
+                        return this.fallbackConnect();
+                    }
                 } catch (error) {
-                    console.error('Wallet connection error:', error);
+                    console.error('RainbowKit connection error:', error);
                     return this.fallbackConnect();
                 }
             }
             
             async fallbackConnect() {
-                console.log('Using fallback wallet connection...');
+                console.log('Using standard wallet connection...');
                 
                 // Check for browser wallets
                 if (typeof window.ethereum !== 'undefined') {
@@ -606,7 +615,7 @@
                 loadingBar.remove();
             }
             
-            wallet = new SimpleWalletConnect();
+            wallet = new RainbowWalletConnect();
             
             const button = document.getElementById('connectWallet');
             if (button) {
