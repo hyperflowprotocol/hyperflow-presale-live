@@ -134,7 +134,7 @@ class HyperFlowPresale {
         try {
             // Initialize WalletConnect provider
             this.walletConnectProvider = new WalletConnectProvider.default({
-                projectId: "ca2_8d4", // HyperFlow Protocol Project ID
+                projectId: "ca21cf0275758f8258a17ae99f6148d4", // HyperFlow Protocol Project ID
                 rpc: {
                     1: "https://mainnet.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
                     5: "https://goerli.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
