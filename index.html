@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HyperFlow Protocol - Presale</title>
     
-    <!-- WalletConnect & Web3 Libraries -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/web3@1.8.0/dist/web3.min.js"></script>
+
     
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Loading Progress Bar -->
-    <div id="loadingBar" class="loading-bar">
-        <div class="loading-progress"></div>
-        <div class="loading-text">Loading HyperFlow Presale...</div>
-    </div>
+
 
     <!-- Navigation -->
     <nav class="nav">
@@ -483,10 +477,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM ready - initializing wallet connection');
             
-            // Hide loading screen immediately
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.display = 'none';
+            // Remove any loading screens
+            const loadingBar = document.getElementById('loadingBar');
+            if (loadingBar) {
+                loadingBar.remove();
             }
             
             wallet = new SimpleWalletConnect();
