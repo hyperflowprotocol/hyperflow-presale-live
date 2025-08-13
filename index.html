@@ -348,12 +348,16 @@
                     // Simple WalletConnect initialization
                     if (window.WalletConnectProvider) {
                         console.log('Initializing WalletConnect provider...');
+                        const projectId = process.env.WALLETCONNECT_PROJECT_ID || 'ca21cf0275758f8258a17ae99f6148d4';
+                        console.log('Using WalletConnect Project ID:', projectId);
+                        
                         this.walletConnectProvider = new window.WalletConnectProvider.default({
                             rpc: {
                                 1: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
                                 11235: "https://rpc.hyperevm.org"
                             },
                             bridge: "https://bridge.walletconnect.org",
+                            projectId: projectId,
                             qrcodeModal: {
                                 open: (uri) => {
                                     console.log('WalletConnect QR URI:', uri);
