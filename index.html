@@ -334,93 +334,51 @@
         </div>
     </footer>
 
-    <!-- WalletConnect and Web3 Libraries -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
-    
     <script>
-        console.log('Loading real Web3 wallet connection...');
+        console.log('Simple wallet connection loading...');
         
-        class RealWalletConnect {
+        class SimpleWalletConnect {
             constructor() {
-                this.web3 = null;
                 this.account = null;
-                this.provider = null;
-                this.projectId = 'ca21cf0275758f8258a17ae99f6148d4';
-            }
-            
-            async init() {
-                console.log('Initializing wallet connection');
-                
-                // Create WalletConnect provider
-                this.provider = new WalletConnectProvider.default({
-                    rpc: {
-                        1: 'https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-                        11155111: 'https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'
-                    },
-                    chainId: 1,
-                    projectId: this.projectId
-                });
-                
-                console.log('WalletConnect provider created');
+                this.web3 = null;
             }
             
             async connectWallet() {
-                try {
-                    console.log('Connecting wallet...');
-                    
-                    if (!this.provider) {
-                        await this.init();
-                    }
-                    
-                    // Enable the provider (this shows the wallet selection modal)
-                    await this.provider.enable();
-                    console.log('Provider enabled');
-                    
-                    // Create Web3 instance
-                    this.web3 = new Web3(this.provider);
-                    
-                    // Get accounts
-                    const accounts = await this.web3.eth.getAccounts();
-                    if (accounts.length > 0) {
-                        this.account = accounts[0];
-                        console.log('Connected account:', this.account);
-                        
-                        // Update UI
-                        this.updateConnectedUI();
-                        return true;
-                    }
-                    
-                } catch (error) {
-                    console.error('Wallet connection error:', error);
-                    
-                    // Fallback to browser wallet (MetaMask, etc.)
-                    if (typeof window.ethereum !== 'undefined') {
-                        console.log('Trying browser wallet...');
-                        return await this.connectBrowserWallet();
-                    } else {
-                        this.showWalletInstallMessage();
-                    }
+                console.log('Attempting wallet connection...');
+                
+                // Check for browser wallets first
+                if (typeof window.ethereum !== 'undefined') {
+                    console.log('Browser wallet detected');
+                    return await this.connectBrowserWallet();
+                } else {
+                    console.log('No browser wallet detected');
+                    this.showWalletOptions();
+                    return false;
                 }
-                return false;
             }
             
             async connectBrowserWallet() {
                 try {
+                    console.log('Connecting to browser wallet...');
+                    
                     // Request account access
                     const accounts = await window.ethereum.request({ 
                         method: 'eth_requestAccounts' 
                     });
                     
-                    if (accounts.length > 0) {
+                    if (accounts && accounts.length > 0) {
                         this.account = accounts[0];
-                        this.web3 = new Web3(window.ethereum);
-                        console.log('Browser wallet connected:', this.account);
+                        console.log('Connected account:', this.account);
                         this.updateConnectedUI();
                         return true;
                     }
                 } catch (error) {
-                    console.error('Browser wallet error:', error);
+                    console.error('Browser wallet connection error:', error);
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user');
+                    } else {
+                        this.showMessage('Failed to connect wallet');
+                    }
                 }
                 return false;
             }
@@ -432,6 +390,7 @@
                 if (button && this.account) {
                     button.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
                     button.style.background = '#10b981';
+                    button.style.color = 'white';
                     
                     if (statusDiv) {
                         statusDiv.innerHTML = `
@@ -441,10 +400,12 @@
                         `;
                         statusDiv.style.color = '#10b981';
                     }
+                    
+                    this.showMessage('Wallet connected successfully!', 'success');
                 }
             }
             
-            showWalletInstallMessage() {
+            showWalletOptions() {
                 const modal = document.createElement('div');
                 modal.style.cssText = `
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -454,22 +415,38 @@
                 
                 modal.innerHTML = `
                     <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
-                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Install a Web3 Wallet</h3>
-                        <p style="color: white; margin-bottom: 20px;">To participate in the presale, you need a Web3 wallet.</p>
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect Your Wallet</h3>
+                        <p style="color: white; margin-bottom: 20px;">Choose how you'd like to connect:</p>
                         
-                        <div style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
-                            <a href="https://metamask.io/download/" target="_blank" 
-                               style="padding: 12px; background: #f6851b; color: white; text-decoration: none; border-radius: 8px;">
-                                📱 Install MetaMask
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <a href="https://metamask.app.link/dapp/hyperflow-presale-live-shal.vercel.app" 
+                               style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f6851b; border-radius: 10px; color: white; text-decoration: none;">
+                                🦊 Connect with MetaMask
                             </a>
-                            <a href="https://trustwallet.com/" target="_blank"
-                               style="padding: 12px; background: #3375bb; color: white; text-decoration: none; border-radius: 8px;">
-                                🛡️ Install Trust Wallet
+                            
+                            <a href="https://link.trustwallet.com/open_url?coin_id=60&url=https://hyperflow-presale-live-shal.vercel.app" 
+                               style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #3375bb; border-radius: 10px; color: white; text-decoration: none;">
+                                🛡️ Connect with Trust Wallet
                             </a>
+                            
+                            <div style="padding: 10px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                Or install a wallet first:
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <a href="https://metamask.io/download/" target="_blank" 
+                                   style="flex: 1; padding: 10px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">
+                                    Install MetaMask
+                                </a>
+                                <a href="https://trustwallet.com/" target="_blank"
+                                   style="flex: 1; padding: 10px; background: #6b7280; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">
+                                    Install Trust
+                                </a>
+                            </div>
                         </div>
                         
                         <button onclick="this.parentElement.parentElement.remove()" 
-                                style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
                             Close
                         </button>
                     </div>
@@ -477,38 +454,69 @@
                 
                 document.body.appendChild(modal);
             }
+            
+            showMessage(message, type = 'info') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+                
+                notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10001;
+                    background: ${bgColor}; color: white; padding: 15px 20px;
+                    border-radius: 8px; font-weight: 500; max-width: 300px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 5000);
+            }
         }
         
         // Initialize wallet connection
-        let walletConnect;
+        let wallet;
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM ready - initializing real wallet connection');
+            console.log('DOM ready - initializing wallet connection');
             
-            walletConnect = new RealWalletConnect();
+            // Hide loading screen immediately
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+            }
+            
+            wallet = new SimpleWalletConnect();
             
             const button = document.getElementById('connectWallet');
             if (button) {
+                console.log('Connect button found, adding event listener');
                 button.addEventListener('click', async function(e) {
                     e.preventDefault();
-                    console.log('Connect wallet clicked');
+                    console.log('Connect wallet button clicked');
                     
-                    if (walletConnect.account) {
-                        console.log('Already connected:', walletConnect.account);
+                    if (wallet.account) {
+                        console.log('Already connected:', wallet.account);
                         return;
                     }
                     
                     // Show loading state
+                    const originalText = button.textContent;
                     button.textContent = 'Connecting...';
                     button.disabled = true;
                     
-                    const success = await walletConnect.connectWallet();
+                    const success = await wallet.connectWallet();
                     
                     if (!success) {
-                        button.textContent = 'Connect Wallet';
+                        button.textContent = originalText;
                         button.disabled = false;
                     }
                 });
+            } else {
+                console.error('Connect button not found!');
             }
         });
     </script>
