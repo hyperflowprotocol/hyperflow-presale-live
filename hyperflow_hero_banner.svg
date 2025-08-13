@@ -1,0 +1,115 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="50%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2dd4bf"/>
+      <stop offset="50%" style="stop-color:#14b8a6"/>
+      <stop offset="100%" style="stop-color:#0d9488"/>
+    </linearGradient>
+    
+    <linearGradient id="flow-gradient-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:0.1"/>
+    </linearGradient>
+    
+    <linearGradient id="flow-gradient-2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#2dd4bf;stop-opacity:0.05"/>
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="400" fill="url(#bg-gradient)"/>
+  
+  <!-- Flowing shapes representing DeFi liquidity -->
+  <path d="M0,100 Q200,80 400,120 T800,100 Q1000,80 1200,120 L1200,0 L0,0 Z" fill="url(#flow-gradient-1)">
+    <animateTransform attributeName="transform" type="translate" values="0,0;20,0;0,0" dur="6s" repeatCount="indefinite"/>
+  </path>
+  
+  <path d="M0,300 Q300,280 600,320 T1200,300 L1200,400 L0,400 Z" fill="url(#flow-gradient-2)">
+    <animateTransform attributeName="transform" type="translate" values="0,0;-15,0;0,0" dur="8s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Geometric elements representing blockchain network -->
+  <g opacity="0.4">
+    <circle cx="100" cy="150" r="3" fill="#2dd4bf">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="300" cy="120" r="2" fill="#14b8a6">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="500" cy="180" r="2.5" fill="#0d9488">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="700" cy="140" r="3" fill="#2dd4bf">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="4.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="900" cy="170" r="2" fill="#14b8a6">
+      <animate attributeName="opacity" values="0.3;0.9;0.3" dur="3.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1100" cy="130" r="2.5" fill="#0d9488">
+      <animate attributeName="opacity" values="0.4;0.8;0.4" dur="4.2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Connection lines -->
+    <line x1="100" y1="150" x2="300" y2="120" stroke="#2dd4bf" stroke-width="1" opacity="0.3">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="300" y1="120" x2="500" y2="180" stroke="#14b8a6" stroke-width="1" opacity="0.3">
+      <animate attributeName="opacity" values="0.1;0.4;0.1" dur="6s" repeatCount="indefinite"/>
+    </line>
+    <line x1="500" y1="180" x2="700" y2="140" stroke="#0d9488" stroke-width="1" opacity="0.3">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="4.5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="700" y1="140" x2="900" y2="170" stroke="#2dd4bf" stroke-width="1" opacity="0.3">
+      <animate attributeName="opacity" values="0.1;0.4;0.1" dur="5.5s" repeatCount="indefinite"/>
+    </line>
+    <line x1="900" y1="170" x2="1100" y2="130" stroke="#14b8a6" stroke-width="1" opacity="0.3">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="4.8s" repeatCount="indefinite"/>
+    </line>
+  </g>
+  
+  <!-- Main content -->
+  <g transform="translate(600,200)">
+    <!-- Protocol name -->
+    <text x="0" y="-40" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="800" fill="url(#text-gradient)">
+      HyperFlow Protocol
+    </text>
+    
+    <!-- Tagline -->
+    <text x="0" y="-10" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#94a3b8">
+      Advanced DeFi Infrastructure for HyperEVM
+    </text>
+    
+
+  </g>
+  
+  <!-- Floating particles -->
+  <g opacity="0.6">
+    <circle cx="150" cy="80" r="1" fill="#2dd4bf">
+      <animateTransform attributeName="transform" type="translate" values="0,0;10,-5;0,0" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="250" cy="320" r="1.5" fill="#14b8a6">
+      <animateTransform attributeName="transform" type="translate" values="0,0;-8,3;0,0" dur="9s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="850" cy="70" r="1" fill="#0d9488">
+      <animateTransform attributeName="transform" type="translate" values="0,0;5,8;0,0" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="950" cy="350" r="1.5" fill="#2dd4bf">
+      <animateTransform attributeName="transform" type="translate" values="0,0;-12,-4;0,0" dur="8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>
