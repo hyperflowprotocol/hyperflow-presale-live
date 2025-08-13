@@ -1102,7 +1102,8 @@
                     button.textContent = 'Connecting...';
                     button.disabled = true;
                     
-                    const success = await wallet.connectWallet();
+                    // Show wallet selection modal instead of auto-connecting
+                    wallet.showWalletSelectionModal();
                     
                     if (!success) {
                         button.textContent = originalText;
