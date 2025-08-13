@@ -49,8 +49,15 @@ class HyperFlowPresale {
         const ethAmountInput = document.getElementById('ethAmount');
         const purchaseButton = document.getElementById('purchaseButton');
 
+        console.log('Setting up event listeners');
+        console.log('Connect button found:', !!connectButton);
+
         if (connectButton) {
-            connectButton.addEventListener('click', () => this.connectWallet());
+            connectButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Connect button clicked');
+                this.connectWallet();
+            });
         }
 
         if (ethAmountInput) {
@@ -63,13 +70,18 @@ class HyperFlowPresale {
     }
 
     async connectWallet() {
+        console.log('Connect wallet clicked');
+        
         // Always show mobile wallet options on mobile devices
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        console.log('Is mobile:', isMobile);
         
         if (isMobile) {
+            console.log('Showing mobile wallet options');
             // Show mobile wallet connection options
             this.connectMobileWallet();
         } else {
+            console.log('Showing desktop wallet modal');
             // Desktop - show modal
             this.showWalletModal();
         }
@@ -579,3 +591,10 @@ notificationStyles.textContent = `
 `;
 
 document.head.appendChild(notificationStyles);
+
+// Initialize presale when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing presale');
+    window.presale = new HyperFlowPresale();
+    console.log('Presale initialized:', !!window.presale);
+});
