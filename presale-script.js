@@ -63,18 +63,12 @@ class HyperFlowPresale {
     }
 
     async connectWallet() {
-        // Detect mobile device
+        // Always show mobile wallet options on mobile devices
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isMobile) {
-            // On mobile, check for wallet apps first
-            if (typeof window.ethereum !== 'undefined') {
-                // Mobile has a wallet browser/app
-                this.connectMetaMask();
-            } else {
-                // No wallet detected, show mobile-specific connection
-                this.connectMobileWallet();
-            }
+            // Show mobile wallet connection options
+            this.connectMobileWallet();
         } else {
             // Desktop - show modal
             this.showWalletModal();
