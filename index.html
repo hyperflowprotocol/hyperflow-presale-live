@@ -328,8 +328,9 @@
         </div>
     </footer>
 
-    <!-- Direct Web3 Integration -->
+    <!-- Web3 and WalletConnect Integration -->
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="module" src="https://unpkg.com/@reown/appkit@1.0.0/dist/index.js"></script>
     
     <script>
         console.log('Loading direct Web3 wallet connection...');
@@ -338,6 +339,84 @@
             constructor() {
                 this.account = null;
                 this.web3 = null;
+                this.web3Modal = null;
+                this.initializeWalletConnect();
+            }
+            
+            async initializeWalletConnect() {
+                try {
+                    // Wait for AppKit to load
+                    await this.waitForAppKit();
+                    
+                    // Initialize AppKit
+                    const { createAppKit } = window.AppKit;
+                    const { mainnet, sepolia } = window.AppKit.networks;
+                    const { WagmiAdapter } = window.AppKit.adapters.wagmi;
+                    
+                    const projectId = 'ca21cf0275758f8258a17ae99f6148d4';
+                    
+                    // Create wagmi config
+                    const adapter = new WagmiAdapter({
+                        projectId,
+                        networks: [mainnet, sepolia]
+                    });
+                    
+                    // Create the modal
+                    this.web3Modal = createAppKit({
+                        adapters: [adapter],
+                        networks: [mainnet, sepolia],
+                        metadata: {
+                            name: 'HyperFlow Presale',
+                            description: 'HyperFlow Protocol Presale Platform',
+                            url: 'https://hyperflow-presale-live-shal.vercel.app',
+                            icons: ['https://hyperflow-presale-live-shal.vercel.app/hyperflow_logo.svg']
+                        },
+                        projectId,
+                        enableAnalytics: true,
+                        enableOnramp: true
+                    });
+                    
+                    console.log('WalletConnect initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize WalletConnect:', error);
+                    // Fallback initialization for older version
+                    this.initializeFallbackWalletConnect();
+                }
+            }
+            
+            async waitForAppKit(maxWait = 5000) {
+                return new Promise((resolve, reject) => {
+                    let elapsed = 0;
+                    const interval = 100;
+                    
+                    const checkAppKit = () => {
+                        if (window.AppKit) {
+                            resolve(true);
+                            return;
+                        }
+                        
+                        elapsed += interval;
+                        if (elapsed >= maxWait) {
+                            reject(new Error('AppKit failed to load'));
+                            return;
+                        }
+                        
+                        setTimeout(checkAppKit, interval);
+                    };
+                    
+                    checkAppKit();
+                });
+            }
+            
+            async initializeFallbackWalletConnect() {
+                console.log('Using fallback WalletConnect initialization');
+                // Simple fallback that shows Rainbow deep link
+                this.web3Modal = {
+                    open: () => {
+                        this.showRainbowConnection();
+                        return Promise.reject(new Error('Use Rainbow deep link'));
+                    }
+                };
             }
             
             async connectWallet() {
