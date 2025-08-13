@@ -340,22 +340,40 @@
             async connectWallet() {
                 console.log('Attempting wallet connection...');
                 
-                // Check for any injected wallet providers
-                if (typeof window.ethereum !== 'undefined') {
-                    console.log('Wallet provider detected');
-                    return await this.connectBrowserWallet();
-                }
+                // Detect mobile devices
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                console.log('Is mobile device:', isMobile);
                 
-                // Check for other wallet providers
-                if (typeof window.web3 !== 'undefined') {
-                    console.log('Legacy web3 provider detected');
-                    return await this.connectBrowserWallet();
+                // For mobile devices, try different detection methods
+                if (isMobile) {
+                    // Try to connect if any wallet provider is available
+                    if (typeof window.ethereum !== 'undefined' || typeof window.web3 !== 'undefined') {
+                        console.log('Mobile wallet provider detected');
+                        return await this.connectBrowserWallet();
+                    }
+                    
+                    // For mobile without detected provider, show mobile-specific options
+                    console.log('No mobile wallet provider detected, showing mobile options');
+                    this.showMobileWalletOptions();
+                    return false;
+                } else {
+                    // Desktop detection
+                    if (typeof window.ethereum !== 'undefined') {
+                        console.log('Desktop wallet provider detected');
+                        return await this.connectBrowserWallet();
+                    }
+                    
+                    // Check for other wallet providers
+                    if (typeof window.web3 !== 'undefined') {
+                        console.log('Legacy web3 provider detected');
+                        return await this.connectBrowserWallet();
+                    }
+                    
+                    // No wallet detected - show installation options
+                    console.log('No desktop wallet provider detected');
+                    await this.showWalletOptions();
+                    return false;
                 }
-                
-                // No wallet detected - show installation options
-                console.log('No wallet provider detected');
-                await this.showWalletOptions();
-                return false;
             }
             
             async connectBrowserWallet() {
@@ -456,6 +474,45 @@
                 
                 document.body.appendChild(modal);
                 return false;
+            }
+            
+            showMobileWalletOptions() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect Mobile Wallet</h3>
+                        <p style="color: white; margin-bottom: 20px;">You have a wallet installed! Please use one of these methods to connect:</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <button onclick="window.location.href='https://metamask.app.link/dapp/hyperflow-presale-live-shal.vercel.app'" 
+                               style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: #f6851b; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer;">
+                                🦊 Open in MetaMask App
+                            </button>
+                            
+                            <button onclick="window.location.href='https://link.trustwallet.com/open_url?coin_id=60&url=https://hyperflow-presale-live-shal.vercel.app'" 
+                               style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: #3375bb; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer;">
+                                🛡️ Open in Trust Wallet
+                            </button>
+                            
+                            <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                Note: This will open the dApp in your wallet's built-in browser where you can safely connect and participate in the presale.
+                            </div>
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
             }
             
             showMessage(message, type = 'info') {
