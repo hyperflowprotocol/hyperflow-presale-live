@@ -328,118 +328,106 @@
         </div>
     </footer>
 
-    <!-- RainbowKit SDK -->
-    <script src="https://unpkg.com/@rainbow-me/rainbowkit@2.0.0/dist/index.js"></script>
-    <script src="https://unpkg.com/wagmi@2.0.0/dist/index.js"></script>
-    <script src="https://unpkg.com/viem@2.0.0/dist/index.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@rainbow-me/rainbowkit@2.0.0/styles.css" />
+    <!-- Direct Web3 Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     
     <script>
-        console.log('Loading RainbowKit wallet connection...');
+        console.log('Loading direct Web3 wallet connection...');
         
-        class RainbowWalletConnect {
+        class DirectWalletConnect {
             constructor() {
                 this.account = null;
-                this.provider = null;
-                this.projectId = 'ca21cf0275758f8258a17ae99f6148d4';
-            }
-            
-            async init() {
-                try {
-                    console.log('Initializing RainbowKit...');
-                    
-                    // Define chains
-                    const mainnet = {
-                        id: 1,
-                        name: 'Ethereum',
-                        nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-                        rpcUrls: { 
-                            default: { http: ['https://cloudflare-eth.com'] },
-                            public: { http: ['https://cloudflare-eth.com'] }
-                        },
-                        blockExplorers: {
-                            default: { name: 'Etherscan', url: 'https://etherscan.io' }
-                        }
-                    };
-                    
-                    // Create connector with Rainbow prioritized
-                    const connectors = RainbowKit.connectorsForWallets([
-                        {
-                            groupName: 'Recommended',
-                            wallets: [
-                                RainbowKit.rainbowWallet({ projectId: this.projectId, chains: [mainnet] }),
-                                RainbowKit.metaMaskWallet({ projectId: this.projectId, chains: [mainnet] }),
-                                RainbowKit.coinbaseWallet({ appName: 'HyperFlow Protocol', chains: [mainnet] }),
-                                RainbowKit.walletConnectWallet({ projectId: this.projectId, chains: [mainnet] })
-                            ]
-                        }
-                    ], {
-                        appName: 'HyperFlow Protocol',
-                        projectId: this.projectId
-                    });
-                    
-                    // Create Wagmi config
-                    this.config = Wagmi.createConfig({
-                        connectors,
-                        chains: [mainnet],
-                        transports: {
-                            [mainnet.id]: Wagmi.http('https://cloudflare-eth.com')
-                        }
-                    });
-                    
-                    // Initialize RainbowKit provider
-                    this.rainbowKitProvider = RainbowKit.RainbowKitProvider({
-                        chains: [mainnet],
-                        config: this.config,
-                        appInfo: {
-                            appName: 'HyperFlow Protocol',
-                            disclaimer: 'Advanced DeFi Infrastructure for HyperEVM'
-                        }
-                    });
-                    
-                    console.log('RainbowKit initialized successfully');
-                } catch (error) {
-                    console.error('Failed to initialize RainbowKit:', error);
-                    return this.fallbackConnect();
-                }
+                this.web3 = null;
             }
             
             async connectWallet() {
-                console.log('Attempting Rainbow wallet connection...');
+                console.log('Attempting direct wallet connection...');
                 
-                try {
-                    // Check if RainbowKit is available
-                    if (typeof RainbowKit !== 'undefined' && RainbowKit.openConnectModal) {
-                        // Open RainbowKit connect modal
-                        RainbowKit.openConnectModal();
-                        return true;
-                    } else {
-                        console.log('RainbowKit not available, using fallback');
-                        return this.fallbackConnect();
-                    }
-                } catch (error) {
-                    console.error('RainbowKit connection error:', error);
-                    return this.fallbackConnect();
-                }
-            }
-            
-            async fallbackConnect() {
-                console.log('Using standard wallet connection...');
-                
-                // Check for browser wallets
+                // Check if any wallet is injected in the browser
                 if (typeof window.ethereum !== 'undefined') {
-                    return await this.connectBrowserWallet();
+                    console.log('Ethereum provider detected');
+                    return await this.connectDirectly();
                 }
                 
-                // Show mobile wallet options for mobile devices
+                // For mobile devices, check different providers
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile) {
-                    this.showMobileWalletOptions();
-                    return false;
+                    console.log('Mobile device detected');
+                    // Try different mobile wallet providers
+                    if (window.ethereum || window.web3) {
+                        return await this.connectDirectly();
+                    } else {
+                        this.showSimpleConnectionOptions();
+                        return false;
+                    }
                 } else {
                     this.showWalletOptions();
                     return false;
                 }
+            }
+            
+            async connectDirectly() {
+                try {
+                    console.log('Connecting directly to wallet...');
+                    
+                    // Request account access
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts.length > 0) {
+                        this.account = accounts[0];
+                        this.web3 = new Web3(window.ethereum);
+                        
+                        console.log('Connected to:', this.account);
+                        this.updateConnectedUI();
+                        this.showMessage('Wallet connected successfully!', 'success');
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Direct connection error:', error);
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect wallet', 'error');
+                    }
+                    return false;
+                }
+            }
+            
+            showSimpleConnectionOptions() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect Your Wallet</h3>
+                        <p style="color: white; margin-bottom: 20px;">Open this page directly in your wallet's browser for the best experience:</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                Copy this link and open it in your wallet app:
+                                <br><strong style="color: white;">https://hyperflow-presale-live-shal.vercel.app</strong>
+                            </div>
+                            
+                            <button onclick="navigator.clipboard.writeText('https://hyperflow-presale-live-shal.vercel.app')" 
+                                   style="padding: 12px 24px; background: #2dd4bf; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Copy Link
+                            </button>
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
             }
             
             async connectBrowserWallet() {
@@ -615,7 +603,7 @@
                 loadingBar.remove();
             }
             
-            wallet = new RainbowWalletConnect();
+            wallet = new DirectWalletConnect();
             
             const button = document.getElementById('connectWallet');
             if (button) {
