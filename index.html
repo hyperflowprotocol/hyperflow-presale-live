@@ -773,57 +773,119 @@
             async connectRainbow() {
                 document.querySelector('.modal-overlay')?.remove();
                 
-                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                // Check if Rainbow is injected
+                if (window.ethereum && window.ethereum.isRainbow) {
+                    console.log('Rainbow detected, connecting...');
+                    return await this.connectDirectly();
+                }
                 
-                if (isMobile) {
-                    // Direct Rainbow app launch
-                    const currentUrl = window.location.href;
-                    window.location.href = `https://rnbwapp.com/to/${encodeURIComponent(currentUrl)}`;
-                } else {
-                    // Desktop - try injection first, then show install prompt
-                    if (window.ethereum && window.ethereum.isRainbow) {
-                        return await this.connectDirectly();
-                    } else {
-                        this.showRainbowInstallPrompt();
+                // Check for multiple providers and find Rainbow
+                if (window.ethereum && window.ethereum.providers) {
+                    const rainbowProvider = window.ethereum.providers.find(p => p.isRainbow);
+                    if (rainbowProvider) {
+                        console.log('Rainbow found in providers array');
+                        this.web3 = new Web3(rainbowProvider);
+                        return await this.connectWithProvider(rainbowProvider);
                     }
                 }
+                
+                // Fallback to WalletConnect
+                console.log('Rainbow not detected, using WalletConnect...');
+                return await this.connectWithWalletConnect();
             }
             
             async connectMetaMask() {
                 document.querySelector('.modal-overlay')?.remove();
                 
+                // Check if MetaMask is the primary provider
                 if (window.ethereum && window.ethereum.isMetaMask) {
+                    console.log('MetaMask detected, connecting...');
                     return await this.connectDirectly();
-                } else {
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    if (isMobile) {
-                        window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
-                    } else {
-                        window.open('https://metamask.io/download/', '_blank');
-                        this.showMessage('Install MetaMask extension and refresh the page', 'info');
+                }
+                
+                // Check for multiple providers and find MetaMask
+                if (window.ethereum && window.ethereum.providers) {
+                    const metaMaskProvider = window.ethereum.providers.find(p => p.isMetaMask);
+                    if (metaMaskProvider) {
+                        console.log('MetaMask found in providers array');
+                        this.web3 = new Web3(metaMaskProvider);
+                        return await this.connectWithProvider(metaMaskProvider);
                     }
                 }
+                
+                this.showMessage('MetaMask not detected. Please install MetaMask extension.', 'error');
+                return false;
             }
             
             async connectCoinbase() {
                 document.querySelector('.modal-overlay')?.remove();
                 
+                // Check if Coinbase Wallet is injected
                 if (window.ethereum && window.ethereum.isCoinbaseWallet) {
+                    console.log('Coinbase Wallet detected, connecting...');
                     return await this.connectDirectly();
-                } else {
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                    if (isMobile) {
-                        window.location.href = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`;
-                    } else {
-                        window.open('https://www.coinbase.com/wallet', '_blank');
-                        this.showMessage('Install Coinbase Wallet and refresh the page', 'info');
+                }
+                
+                // Check for multiple providers and find Coinbase
+                if (window.ethereum && window.ethereum.providers) {
+                    const coinbaseProvider = window.ethereum.providers.find(p => p.isCoinbaseWallet);
+                    if (coinbaseProvider) {
+                        console.log('Coinbase Wallet found in providers array');
+                        this.web3 = new Web3(coinbaseProvider);
+                        return await this.connectWithProvider(coinbaseProvider);
                     }
                 }
+                
+                this.showMessage('Coinbase Wallet not detected. Please install Coinbase Wallet.', 'error');
+                return false;
             }
             
             async connectWalletConnect() {
                 document.querySelector('.modal-overlay')?.remove();
+                console.log('Using WalletConnect...');
                 return await this.connectWithWalletConnect();
+            }
+            
+            async connectWithProvider(provider) {
+                try {
+                    console.log('Connecting with specific provider...');
+                    
+                    const accounts = await provider.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts && accounts.length > 0) {
+                        this.account = accounts[0];
+                        this.web3 = new Web3(provider);
+                        
+                        // Listen for account changes
+                        provider.on('accountsChanged', (accounts) => {
+                            if (accounts.length === 0) {
+                                this.disconnectWallet();
+                            } else {
+                                this.account = accounts[0];
+                                this.updateConnectedUI();
+                            }
+                        });
+                        
+                        console.log('Connected to:', this.account);
+                        this.updateConnectedUI();
+                        this.showMessage('Wallet connected successfully!', 'success');
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.error('Provider connection error:', error);
+                    
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect: ' + error.message, 'error');
+                    }
+                    
+                    return false;
+                }
             }
             
             showRainbowInstallPrompt() {
