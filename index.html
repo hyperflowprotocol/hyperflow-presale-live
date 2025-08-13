@@ -328,50 +328,107 @@
         </div>
     </footer>
 
+    <!-- Reown AppKit SDK -->
+    <script src="https://unpkg.com/@reown/appkit@1.0.0/dist/index.js"></script>
+    <script src="https://unpkg.com/@reown/appkit-adapter-ethers@1.0.0/dist/index.js"></script>
+    
     <script>
-        console.log('Simple wallet connection loading...');
+        console.log('Loading Reown AppKit wallet connection...');
         
-        class SimpleWalletConnect {
+        class ReownWalletConnect {
             constructor() {
                 this.account = null;
-                this.web3 = null;
+                this.modal = null;
+                this.projectId = 'ca21cf0275758f8258a17ae99f6148d4';
+            }
+            
+            async init() {
+                try {
+                    console.log('Initializing Reown AppKit...');
+                    
+                    // Initialize Reown AppKit
+                    this.modal = ReownAppKit.createAppKit({
+                        projectId: this.projectId,
+                        networks: [
+                            {
+                                id: 1,
+                                name: 'Ethereum',
+                                nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+                                rpcUrls: { 
+                                    default: { http: ['https://cloudflare-eth.com'] },
+                                    public: { http: ['https://cloudflare-eth.com'] }
+                                },
+                                blockExplorers: {
+                                    default: { name: 'Etherscan', url: 'https://etherscan.io' }
+                                }
+                            }
+                        ],
+                        metadata: {
+                            name: 'HyperFlow Protocol',
+                            description: 'Advanced DeFi Infrastructure for HyperEVM',
+                            url: 'https://hyperflow-presale-live-shal.vercel.app',
+                            icons: ['https://hyperflow-presale-live-shal.vercel.app/hyperflow_logo.svg']
+                        },
+                        featuredWalletIds: [
+                            'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
+                            '4622a2b2d6af1c9844944291e5e7351a6aa24cd7b23099efac1b2fd875da31a0', // Trust Wallet
+                            '1ae92b26df02f0abca6304df07debccd18262fdf5fe82daa81593582dac9a369', // Rainbow
+                            'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa'  // Coinbase
+                        ]
+                    });
+                    
+                    // Subscribe to account changes
+                    this.modal.subscribeAccount((account) => {
+                        console.log('Account changed:', account);
+                        if (account.isConnected) {
+                            this.account = account.address;
+                            this.updateConnectedUI();
+                        } else {
+                            this.account = null;
+                            this.updateDisconnectedUI();
+                        }
+                    });
+                    
+                    console.log('Reown AppKit initialized successfully');
+                } catch (error) {
+                    console.error('Failed to initialize Reown AppKit:', error);
+                    // Fallback to simple wallet detection
+                    return this.fallbackConnect();
+                }
             }
             
             async connectWallet() {
                 console.log('Attempting wallet connection...');
                 
-                // Detect mobile devices
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                console.log('Is mobile device:', isMobile);
+                if (!this.modal) {
+                    await this.init();
+                }
                 
-                // For mobile devices, try different detection methods
+                try {
+                    // Open Reown AppKit modal
+                    await this.modal.open();
+                    return true;
+                } catch (error) {
+                    console.error('Wallet connection error:', error);
+                    return this.fallbackConnect();
+                }
+            }
+            
+            async fallbackConnect() {
+                console.log('Using fallback wallet connection...');
+                
+                // Check for browser wallets
+                if (typeof window.ethereum !== 'undefined') {
+                    return await this.connectBrowserWallet();
+                }
+                
+                // Show mobile wallet options for mobile devices
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                 if (isMobile) {
-                    // Try to connect if any wallet provider is available
-                    if (typeof window.ethereum !== 'undefined' || typeof window.web3 !== 'undefined') {
-                        console.log('Mobile wallet provider detected');
-                        return await this.connectBrowserWallet();
-                    }
-                    
-                    // For mobile without detected provider, show mobile-specific options
-                    console.log('No mobile wallet provider detected, showing mobile options');
                     this.showMobileWalletOptions();
                     return false;
                 } else {
-                    // Desktop detection
-                    if (typeof window.ethereum !== 'undefined') {
-                        console.log('Desktop wallet provider detected');
-                        return await this.connectBrowserWallet();
-                    }
-                    
-                    // Check for other wallet providers
-                    if (typeof window.web3 !== 'undefined') {
-                        console.log('Legacy web3 provider detected');
-                        return await this.connectBrowserWallet();
-                    }
-                    
-                    // No wallet detected - show installation options
-                    console.log('No desktop wallet provider detected');
-                    await this.showWalletOptions();
+                    this.showWalletOptions();
                     return false;
                 }
             }
