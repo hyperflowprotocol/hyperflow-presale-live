@@ -424,50 +424,69 @@
                 throw new Error('All connection methods failed');
             }
             
-            showDebugInfo() {
-                const debugInfo = {
-                    userAgent: navigator.userAgent,
-                    hasEthereum: typeof window.ethereum !== 'undefined',
-                    hasWeb3: typeof window.web3 !== 'undefined',
-                    ethereumMethods: window.ethereum ? Object.getOwnPropertyNames(window.ethereum) : [],
-                    web3Methods: window.web3 ? Object.getOwnPropertyNames(window.web3) : [],
-                    allEthProps: Object.keys(window).filter(k => k.toLowerCase().includes('eth'))
-                };
+            showRainbowConnection() {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const currentUrl = window.location.href;
                 
                 const modal = document.createElement('div');
                 modal.style.cssText = `
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.9); z-index: 10000;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
                     display: flex; justify-content: center; align-items: center;
-                    overflow-y: auto;
                 `;
                 
-                modal.innerHTML = `
-                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 500px; text-align: left;">
-                        <h3 style="color: #2dd4bf; margin-bottom: 20px; text-align: center;">Wallet Debug Info</h3>
-                        
-                        <div style="color: white; font-family: monospace; font-size: 12px; background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 20px; overflow-x: auto;">
-                            <pre>${JSON.stringify(debugInfo, null, 2)}</pre>
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <button onclick="window.wallet.forceConnection()" 
-                                   style="padding: 12px 24px; background: #2dd4bf; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Force Connect Attempt
-                            </button>
+                if (isMobile) {
+                    // Mobile - direct Rainbow deep link
+                    const rainbowUrl = `https://rnbwapp.com/to/${encodeURIComponent(currentUrl)}`;
+                    modal.innerHTML = `
+                        <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                            <div style="color: #ff6b6b; font-size: 48px; margin-bottom: 20px;">🌈</div>
+                            <h3 style="color: #2dd4bf; margin-bottom: 20px;">Open in Rainbow Wallet</h3>
+                            <p style="color: white; margin-bottom: 20px;">For the best experience, open this page in Rainbow wallet:</p>
                             
-                            <button onclick="navigator.clipboard.writeText(JSON.stringify(${JSON.stringify(debugInfo)}, null, 2))" 
-                                   style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Copy Debug Info
-                            </button>
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                                <button onclick="window.location.href='${rainbowUrl}'" 
+                                       style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: bold; cursor: pointer;">
+                                    🌈 Open in Rainbow
+                                </button>
+                                
+                                <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                    This will open the presale in Rainbow's secure browser where you can connect your wallet safely.
+                                </div>
+                            </div>
                             
-                            <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                                    style="padding: 12px 24px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer;">
-                                Close
+                            <button onclick="this.parentElement.parentElement.remove()" 
+                                    style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Cancel
                             </button>
                         </div>
-                    </div>
-                `;
+                    `;
+                } else {
+                    // Desktop - instructions for Rainbow extension
+                    modal.innerHTML = `
+                        <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                            <div style="color: #ff6b6b; font-size: 48px; margin-bottom: 20px;">🌈</div>
+                            <h3 style="color: #2dd4bf; margin-bottom: 20px;">Install Rainbow Extension</h3>
+                            <p style="color: white; margin-bottom: 20px;">Install the Rainbow browser extension to connect your wallet:</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                                <a href="https://rainbow.me/" target="_blank" 
+                                   style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border-radius: 12px; color: white; font-size: 16px; font-weight: bold; text-decoration: none;">
+                                    🌈 Get Rainbow Extension
+                                </a>
+                                
+                                <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                    After installing, refresh this page and click "Connect Wallet" again.
+                                </div>
+                            </div>
+                            
+                            <button onclick="this.parentElement.parentElement.remove()" 
+                                    style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Cancel
+                            </button>
+                        </div>
+                    `;
+                }
                 
                 document.body.appendChild(modal);
             }
@@ -511,8 +530,8 @@
             }
             
             showSimpleConnectionOptions() {
-                // Show debug info instead of simple connection
-                this.showDebugInfo();
+                // Show Rainbow connection options
+                this.showRainbowConnection();
             }
             
             async connectBrowserWallet() {
