@@ -449,20 +449,83 @@
             }
             
             async connectWallet() {
-                console.log('Attempting wallet connection...');
+                console.log('Opening wallet selection modal...');
+                this.showWalletSelectionModal();
+            }
+            
+            showWalletSelectionModal() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
                 
-                // First try direct injection (desktop browsers with extensions)
-                if (window.ethereum) {
-                    try {
-                        return await this.connectDirectly();
-                    } catch (error) {
-                        console.log('Direct connection failed:', error.message);
-                    }
-                }
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: 20px; padding: 30px; margin: 20px; max-width: 400px; width: 90%; text-align: center;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: #1a1a1a; margin: 0; font-size: 20px; font-weight: 600;">Connect a Wallet</h3>
+                            <button onclick="this.closest('.modal-overlay').remove()" 
+                                    style="background: none; border: none; font-size: 24px; color: #666; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+                            <button onclick="window.wallet.connectRainbow()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;">🌈</div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Rainbow</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectCoinbase()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #0052ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">CB</div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Coinbase</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectMetaMask()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #f6851b; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px;">🦊</div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">MetaMask</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectWalletConnect()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #3b99fc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">🔗</div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">WalletConnect</span>
+                            </button>
+                        </div>
+                        
+                        <div style="border-top: 1px solid #e5e5e5; padding-top: 20px;">
+                            <h4 style="color: #1a1a1a; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">What is a Wallet?</h4>
+                            <p style="color: #666; margin: 0 0 20px 0; font-size: 14px; line-height: 1.4;">
+                                A wallet is used to send, receive, store, and display digital assets. It's also a new way to log in, without needing to create new accounts and passwords on every website.
+                            </p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center;">
+                                <button style="color: #3b99fc; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500;">Get a Wallet</button>
+                                <button style="color: #3b99fc; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500;">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 
-                // For mobile or no injection, use WalletConnect (this is what works)
-                console.log('Using WalletConnect for Rainbow connection...');
-                return await this.connectWithWalletConnect();
+                modal.className = 'modal-overlay';
+                document.body.appendChild(modal);
+                
+                // Add hover effects
+                const buttons = modal.querySelectorAll('button[onclick*="connect"]');
+                buttons.forEach(button => {
+                    button.addEventListener('mouseenter', () => {
+                        button.style.borderColor = '#3b99fc';
+                        button.style.transform = 'scale(1.02)';
+                    });
+                    button.addEventListener('mouseleave', () => {
+                        button.style.borderColor = '#e5e5e5';
+                        button.style.transform = 'scale(1)';
+                    });
+                });
             }
             
             async waitForWalletProvider(maxWait = 3000) {
@@ -707,9 +770,71 @@
                 }
             }
             
+            async connectRainbow() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    // Direct Rainbow app launch
+                    const currentUrl = window.location.href;
+                    window.location.href = `https://rnbwapp.com/to/${encodeURIComponent(currentUrl)}`;
+                } else {
+                    // Desktop - try injection first, then show install prompt
+                    if (window.ethereum && window.ethereum.isRainbow) {
+                        return await this.connectDirectly();
+                    } else {
+                        this.showRainbowInstallPrompt();
+                    }
+                }
+            }
+            
+            async connectMetaMask() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                if (window.ethereum && window.ethereum.isMetaMask) {
+                    return await this.connectDirectly();
+                } else {
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (isMobile) {
+                        window.location.href = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+                    } else {
+                        window.open('https://metamask.io/download/', '_blank');
+                        this.showMessage('Install MetaMask extension and refresh the page', 'info');
+                    }
+                }
+            }
+            
+            async connectCoinbase() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                if (window.ethereum && window.ethereum.isCoinbaseWallet) {
+                    return await this.connectDirectly();
+                } else {
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    if (isMobile) {
+                        window.location.href = `https://go.cb-w.com/dapp?cb_url=${encodeURIComponent(window.location.href)}`;
+                    } else {
+                        window.open('https://www.coinbase.com/wallet', '_blank');
+                        this.showMessage('Install Coinbase Wallet and refresh the page', 'info');
+                    }
+                }
+            }
+            
+            async connectWalletConnect() {
+                document.querySelector('.modal-overlay')?.remove();
+                return await this.connectWithWalletConnect();
+            }
+            
+            showRainbowInstallPrompt() {
+                this.showMessage('Install Rainbow wallet extension or use the mobile app', 'info');
+                setTimeout(() => {
+                    window.open('https://rainbow.me/', '_blank');
+                }, 1000);
+            }
+            
             showSimpleConnectionOptions() {
-                // This should not be called anymore
-                this.connectWithWalletConnect();
+                this.showWalletSelectionModal();
             }
             
             async connectBrowserWallet() {
