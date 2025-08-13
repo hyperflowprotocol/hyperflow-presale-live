@@ -1097,18 +1097,12 @@
                         return;
                     }
                     
-                    // Show loading state
-                    const originalText = button.textContent;
-                    button.textContent = 'Connecting...';
-                    button.disabled = true;
-                    
-                    // Show wallet selection modal instead of auto-connecting
+                    // Show wallet selection modal (like Hybra)
                     wallet.showWalletSelectionModal();
                     
-                    if (!success) {
-                        button.textContent = originalText;
-                        button.disabled = false;
-                    }
+                    // Reset button state
+                    button.textContent = originalText;
+                    button.disabled = false;
                 });
             } else {
                 console.error('Connect button not found!');
