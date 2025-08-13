@@ -445,8 +445,8 @@
                 console.log('Using fallback connection');
                 this.web3Modal = {
                     open: () => {
-                        this.showRainbowConnection();
-                        return Promise.reject(new Error('Use Rainbow app'));
+                        this.showWalletSelectionModal();
+                        return Promise.reject(new Error('Select wallet first'));
                     }
                 };
             }
