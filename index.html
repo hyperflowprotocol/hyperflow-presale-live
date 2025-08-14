@@ -461,6 +461,25 @@
             }
             
             showWalletSelectionModal() {
+                // Use actual Privy modal instead of custom one
+                if (window.privyReady && privy && privy.login) {
+                    console.log('🎯 LAUNCHING REAL PRIVY MODAL - SAME AS PRIVY.IO/DEMO');
+                    privy.login();
+                } else {
+                    console.log('Privy not ready, checking again...');
+                    setTimeout(() => {
+                        if (window.privyReady && privy && privy.login) {
+                            console.log('🎯 PRIVY NOW READY - LAUNCHING MODAL');
+                            privy.login();
+                        } else {
+                            console.log('Privy still not available, showing fallback modal');
+                            this.showFallbackWalletModal();
+                        }
+                    }, 500);
+                }
+            }
+            
+            showFallbackWalletModal() {
                 const modal = document.createElement('div');
                 modal.style.cssText = `
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1091,44 +1110,58 @@
         let privy = null;
         
         function initializePrivyBackend() {
-            if (!window.Privy) {
-                console.log('Privy SDK not loaded, using direct wallet only');
-                return;
-            }
+            // Wait for Privy SDK to load completely
+            const initPrivy = () => {
+                if (!window.Privy) {
+                    console.log('Privy SDK still loading, retrying...');
+                    setTimeout(initPrivy, 100);
+                    return;
+                }
+                
+                try {
+                    console.log('🎯 INITIALIZING REAL PRIVY MODAL BACKEND...');
+                    privy = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
+                        appearance: {
+                            theme: 'light',
+                            accentColor: '#2563eb',
+                            borderRadius: 12,
+                            showWalletLoginFirst: true,
+                            logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png'
+                        },
+                        loginMethods: ['wallet'],
+                        walletConnect: {
+                            projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                        },
+                        supportedChains: [{
+                            id: 999,
+                            name: 'HyperEVM',
+                            nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
+                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
+                            blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
+                        }],
+                        embeddedWallets: {
+                            createOnLogin: 'off'
+                        }
+                    });
+                    
+                    // Enhanced confirmation handlers
+                    privy.onAuthenticationChange(function(authenticated, user) {
+                        console.log('🎯 PRIVY AUTH CONFIRMATION:', authenticated, user);
+                        if (authenticated && user) {
+                            handlePrivyConnection(user);
+                        }
+                    });
+                    
+                    console.log('✅ REAL PRIVY MODAL BACKEND READY');
+                    window.privyReady = true;
+                    
+                } catch (error) {
+                    console.error('Privy initialization failed:', error);
+                    window.privyReady = false;
+                }
+            };
             
-            try {
-                console.log('Initializing Privy backend support...');
-                privy = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
-                    appearance: {
-                        theme: 'dark',
-                        accentColor: '#2dd4bf',
-                        borderRadius: 12,
-                        showWalletLoginFirst: true
-                    },
-                    loginMethods: ['wallet'],
-                    walletConnect: {
-                        projectId: 'ca21cf0275758f8258a17ae99f6148d4'
-                    },
-                    defaultChain: {
-                        id: 999,
-                        name: 'HyperEVM',
-                        nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
-                        rpcUrls: { default: ['https://rpc.hyperliquid.xyz/evm'] }
-                    }
-                });
-                
-                // Enhanced confirmation handlers
-                privy.onAuthenticationChange && privy.onAuthenticationChange(function(authenticated, user) {
-                    console.log('🎯 PRIVY AUTH CONFIRMATION:', authenticated, user);
-                    if (authenticated && user) {
-                        handlePrivyConnection(user);
-                    }
-                });
-                
-                console.log('Privy backend initialized successfully');
-            } catch (error) {
-                console.error('Privy initialization failed:', error);
-            }
+            initPrivy();
         }
         
         function handlePrivyConnection(user) {
