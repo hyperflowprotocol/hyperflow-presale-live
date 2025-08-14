@@ -72,19 +72,9 @@ class HyperFlowPresale {
     async connectWallet() {
         console.log('Connect wallet clicked');
         
-        // Always show mobile wallet options on mobile devices
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        console.log('Is mobile:', isMobile);
-        
-        if (isMobile) {
-            console.log('Showing mobile wallet options');
-            // Show mobile wallet connection options
-            this.connectMobileWallet();
-        } else {
-            console.log('Showing desktop wallet modal');
-            // Desktop - show modal
-            this.showWalletModal();
-        }
+        // Show wallet selection modal for both mobile and desktop
+        console.log('Showing wallet selection modal');
+        this.showWalletModal();
     }
 
     showWalletModal() {
@@ -97,24 +87,38 @@ class HyperFlowPresale {
                     <button class="wallet-modal-close" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
                 </div>
                 <div class="wallet-options">
-                    <button class="wallet-option" onclick="window.presale.connectMetaMask()">
+                    <button class="wallet-option" onclick="window.presale.connectMetaMask(); window.presale.closeModal();">
                         <div class="wallet-icon">🦊</div>
                         <div class="wallet-info">
                             <div class="wallet-name">MetaMask</div>
                             <div class="wallet-desc">Browser Extension</div>
                         </div>
                     </button>
-                    <button class="wallet-option" onclick="window.presale.connectWalletConnect()">
+                    <button class="wallet-option" onclick="window.presale.connectWalletConnect(); window.presale.closeModal();">
                         <div class="wallet-icon">📱</div>
                         <div class="wallet-info">
                             <div class="wallet-name">WalletConnect</div>
-                            <div class="wallet-desc">Mobile Wallets</div>
+                            <div class="wallet-desc">Mobile Wallets & QR Code</div>
+                        </div>
+                    </button>
+                    <button class="wallet-option" onclick="window.presale.connectCoinbase(); window.presale.closeModal();">
+                        <div class="wallet-icon">🔵</div>
+                        <div class="wallet-info">
+                            <div class="wallet-name">Coinbase Wallet</div>
+                            <div class="wallet-desc">Coinbase Browser Extension</div>
                         </div>
                     </button>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     async connectMobileWallet() {
@@ -130,7 +134,7 @@ class HyperFlowPresale {
                 <div class="mobile-wallet-instructions">
                     <p>Choose your preferred wallet:</p>
                     <div class="mobile-wallet-links">
-                        <a href="https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}" class="mobile-wallet-link">
+                        <a href="https://metamask.app.link/dapp/${window.location.hostname}${window.location.pathname}" class="mobile-wallet-link">
                             <span class="wallet-icon">🦊</span>
                             <span>Open in MetaMask</span>
                         </a>
@@ -138,7 +142,7 @@ class HyperFlowPresale {
                             <span class="wallet-icon">🛡️</span>
                             <span>Open in Trust Wallet</span>
                         </a>
-                        <a href="https://rainbow.me" class="mobile-wallet-link">
+                        <a href="https://rnbwapp.com/browser?url=${encodeURIComponent(window.location.href)}" class="mobile-wallet-link">
                             <span class="wallet-icon">🌈</span>
                             <span>Open in Rainbow</span>
                         </a>
@@ -193,25 +197,28 @@ class HyperFlowPresale {
 
     async connectWalletConnect() {
         try {
-            // Initialize WalletConnect provider
-            this.walletConnectProvider = new WalletConnectProvider.default({
+            // Initialize WalletConnect v2 provider
+            this.walletConnectProvider = await window.WalletConnectEthereumProvider.default.init({
                 projectId: "ca21cf0275758f8258a17ae99f6148d4", // HyperFlow Protocol Project ID
-                rpc: {
-                    1: "https://mainnet.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
-                    5: "https://goerli.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0",
-                    11155111: "https://sepolia.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0"
+                chains: [1], // Ethereum mainnet
+                showQrModal: true,
+                qrModalOptions: {
+                    themeMode: "dark",
+                    themeVariables: {
+                        "--wcm-z-index": "1000",
+                        "--wcm-accent-color": "#2dd4bf",
+                        "--wcm-accent-fill-color": "#0f172a",
+                        "--wcm-background-color": "#1e293b"
+                    }
                 },
-                chainId: 1,
-                qrcodeModalOptions: {
-                    mobileLinks: [
-                        "metamask",
-                        "trust",
-                        "rainbow",
-                        "argent",
-                        "coinbase",
-                        "imtoken",
-                        "pillar"
-                    ]
+                rpcMap: {
+                    1: "https://mainnet.infura.io/v3/8043bb2cf99347b1bfadfb233c5325c0"
+                },
+                metadata: {
+                    name: "HyperFlow Protocol",
+                    description: "Advanced DeFi Infrastructure for HyperEVM",
+                    url: window.location.origin,
+                    icons: [`${window.location.origin}/hyperflow_logo.svg`]
                 }
             });
 
@@ -227,6 +234,7 @@ class HyperFlowPresale {
 
             // Listen for account changes
             this.walletConnectProvider.on('accountsChanged', (accounts) => {
+                console.log('WalletConnect accounts changed:', accounts);
                 if (accounts.length === 0) {
                     this.disconnectWallet();
                 } else {
@@ -235,8 +243,15 @@ class HyperFlowPresale {
                 }
             });
 
+            // Listen for chain changes
+            this.walletConnectProvider.on('chainChanged', (chainId) => {
+                console.log('WalletConnect chain changed:', chainId);
+                // Handle chain changes if needed
+            });
+
             // Listen for disconnection
-            this.walletConnectProvider.on('disconnect', () => {
+            this.walletConnectProvider.on('disconnect', (error) => {
+                console.log('WalletConnect disconnected:', error);
                 this.disconnectWallet();
             });
 
@@ -253,10 +268,39 @@ class HyperFlowPresale {
         }
     }
 
-    disconnectWallet() {
-        // Disconnect WalletConnect if active
-        if (this.walletConnectProvider && this.walletConnectProvider.connected) {
-            this.walletConnectProvider.disconnect();
+    async connectCoinbase() {
+        // Check if Coinbase Wallet is available
+        if (window.ethereum && window.ethereum.isCoinbaseWallet) {
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                this.provider = window.ethereum;
+                this.web3 = new Web3(window.ethereum);
+                this.account = accounts[0];
+                this.updateWalletStatus(true, 'Coinbase Wallet');
+                this.showPresaleForm();
+                this.closeModal();
+                
+            } catch (error) {
+                console.error('Error connecting Coinbase Wallet:', error);
+                this.showError('Failed to connect Coinbase Wallet. Please try again.');
+            }
+        } else {
+            // Try to connect via WalletConnect for mobile Coinbase Wallet
+            this.showError('Coinbase Wallet extension not detected. Please install it or use WalletConnect for mobile.');
+        }
+    }
+
+    async disconnectWallet() {
+        try {
+            // Disconnect WalletConnect if active
+            if (this.walletConnectProvider && this.walletConnectProvider.connected) {
+                await this.walletConnectProvider.disconnect();
+            }
+        } catch (error) {
+            console.log('Error disconnecting WalletConnect:', error);
         }
         
         this.account = null;
