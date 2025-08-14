@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperFlow Protocol - Dynamic Privy Integration</title>
+    <link rel="stylesheet" href="presale-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- React and Privy -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://auth.privy.io/js/auth.js"></script>
+    
+    <style>
+        .dynamic-wallet-selector {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 1px solid rgba(45, 212, 191, 0.3);
+        }
+        
+        .smart-connect-btn {
+            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .smart-connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3);
+        }
+        
+        .wallet-option {
+            background: rgba(30, 41, 59, 0.8);
+            color: white;
+            border: 1px solid rgba(45, 212, 191, 0.5);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .wallet-option:hover {
+            background: rgba(45, 212, 191, 0.2);
+            border-color: #2dd4bf;
+        }
+        
+        .wallet-option.preferred {
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.3), rgba(20, 184, 166, 0.3));
+            border-color: #2dd4bf;
+        }
+        
+        .preference-manager {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: white;
+        }
+        
+        .preference-manager select {
+            background: rgba(15, 23, 42, 0.9);
+            color: white;
+            border: 1px solid rgba(45, 212, 191, 0.5);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 5px 10px;
+        }
+        
+        .config-status {
+            background: rgba(45, 212, 191, 0.1);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            color: #2dd4bf;
+        }
+        
+        .loading-indicator {
+            text-align: center;
+            padding: 40px;
+            color: #2dd4bf;
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(45, 212, 191, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #2dd4bf;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="hyperflow_logo.svg?v=8" alt="HyperFlow Protocol" class="logo-svg">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Main Site</a></li>
+                <li><a href="https://hyperflowprotocol.github.io" target="_blank">Whitepaper</a></li>
+                <li><a href="https://x.com/hflow_protocol?s=21" target="_blank">Twitter</a></li>
+                <li><a href="#presale" class="cta-button">Join Presale</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div style="width: 100%; margin-top: 80px; margin-bottom: 40px;">
+        <img src="hyperflow_hero_banner.svg" alt="HyperFlow Protocol Hero Banner" style="width: 100%; height: auto; display: block;">
+    </div>
+
+    <!-- Main Content -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-gradient">Dynamic Privy Integration</span>
+                    <span class="title-subtitle">Smart Wallet Selection • Adaptive Configuration • User Preferences</span>
+                </h1>
+                
+                <div id="dynamic-privy-app" class="dynamic-wallet-selector">
+                    <!-- React app will render here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // 1. Configuration fetched from API/environment
+        const fetchPrivyConfig = async () => {
+            try {
+                // Simulate API call - replace with your actual endpoint
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+                
+                return {
+                    appId: 'cmebbx3i201jwif0bhy9kxh32', // Your actual Privy App ID
+                    theme: 'light',
+                    walletList: ['metamask', 'coinbase_wallet', 'rainbow', 'wallet_connect'],
+                    loginMethods: ['wallet'],
+                    chains: [
+                        {
+                            id: 999,
+                            name: 'HyperEVM',
+                            rpcUrl: 'https://rpc.hyperliquid.xyz/evm',
+                            nativeCurrency: { name: 'HYPE', symbol: 'HYPE', decimals: 18 }
+                        }
+                    ],
+                    showWalletLoginFirst: true,
+                    logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png'
+                };
+            } catch (error) {
+                console.error('Failed to fetch Privy config:', error);
+                return null;
+            }
+        };
+
+        // 2. Dynamic wallet list based on user preferences
+        const getDynamicWalletList = (userPreferences, availableWallets) => {
+            const walletPriority = {
+                high: ['metamask', 'coinbase_wallet', 'rainbow'],
+                medium: ['phantom', 'zerion', 'okx_wallet'],
+                low: ['wallet_connect', 'detected_ethereum_wallets'],
+            };
+
+            let dynamicList = [];
+
+            // Add wallets based on user region
+            if (userPreferences?.region === 'US') {
+                dynamicList.push('coinbase_wallet', 'metamask');
+            } else if (userPreferences?.region === 'ASIA') {
+                dynamicList.push('okx_wallet', 'metamask');
+            } else {
+                dynamicList.push('metamask', 'rainbow');
+            }
+
+            // Add remaining available wallets
+            availableWallets.forEach(wallet => {
+                if (!dynamicList.includes(wallet)) {
+                    dynamicList.push(wallet);
+                }
+            });
+
+            // Always include WalletConnect for fallback
+            if (!dynamicList.includes('wallet_connect')) {
+                dynamicList.push('wallet_connect');
+            }
+
+            return dynamicList;
+        };
+
+        // 3. Smart Wallet Selector Component
+        function SmartWalletSelector() {
+            const [config, setConfig] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [userPreferences, setUserPreferences] = useState({
+                region: 'AUTO',
+                preferredChain: 'ethereum'
+            });
+            const [availableWallets, setAvailableWallets] = useState([
+                'metamask', 'coinbase_wallet', 'rainbow', 'wallet_connect'
+            ]);
+            const [privy, setPrivy] = useState(null);
+            const [connected, setConnected] = useState(false);
+
+            useEffect(() => {
+                const loadConfig = async () => {
+                    try {
+                        const privyConfig = await fetchPrivyConfig();
+                        setConfig(privyConfig);
+                        
+                        if (privyConfig && window.Privy) {
+                            const privyInstance = window.Privy.initialize(privyConfig.appId, {
+                                appearance: {
+                                    theme: privyConfig.theme,
+                                    accentColor: '#2dd4bf',
+                                    borderRadius: 12,
+                                    showWalletLoginFirst: true,
+                                    logo: privyConfig.logo
+                                },
+                                loginMethods: privyConfig.loginMethods,
+                                walletConnect: {
+                                    projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                                },
+                                defaultChain: privyConfig.chains[0],
+                                supportedChains: privyConfig.chains
+                            });
+                            
+                            setPrivy(privyInstance);
+                        }
+                    } catch (error) {
+                        console.error('Error loading Privy config:', error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                loadConfig();
+            }, []);
+
+            const handleSmartConnect = async () => {
+                if (!privy) {
+                    console.error('Privy not initialized');
+                    return;
+                }
+
+                const dynamicWalletList = getDynamicWalletList(userPreferences, availableWallets);
+                console.log('🎯 LAUNCHING SMART PRIVY MODAL WITH DYNAMIC WALLETS:', dynamicWalletList);
+                
+                try {
+                    await privy.login();
+                    setConnected(true);
+                } catch (error) {
+                    console.error('Smart wallet connection failed:', error);
+                }
+            };
+
+            const handleConnectSpecificWallet = async (walletType) => {
+                if (!privy) return;
+                
+                console.log(`🎯 CONNECTING TO SPECIFIC WALLET: ${walletType}`);
+                try {
+                    await privy.login();
+                    setConnected(true);
+                } catch (error) {
+                    console.error(`Failed to connect to ${walletType}:`, error);
+                }
+            };
+
+            const updatePreferences = (newPrefs) => {
+                setUserPreferences(prev => ({ ...prev, ...newPrefs }));
+                console.log('Updated preferences:', { ...userPreferences, ...newPrefs });
+            };
+
+            if (loading) {
+                return (
+                    <div className="loading-indicator">
+                        <div className="loading-spinner"></div>
+                        <p>Loading smart wallet configuration...</p>
+                    </div>
+                );
+            }
+
+            if (!config) {
+                return (
+                    <div className="config-status">
+                        <p>❌ Error: Privy configuration not available</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    <div className="config-status">
+                        <p>✅ Smart Privy Configuration Loaded</p>
+                        <p><strong>App ID:</strong> {config.appId}</p>
+                        <p><strong>Supported Chains:</strong> {config.chains.map(c => c.name).join(', ')}</p>
+                    </div>
+
+                    {/* User Preference Manager */}
+                    <div className="preference-manager">
+                        <h3>🎛️ Smart Wallet Preferences</h3>
+                        
+                        <label>
+                            Region:
+                            <select 
+                                value={userPreferences.region || ''} 
+                                onChange={(e) => updatePreferences({region: e.target.value})}
+                            >
+                                <option value="AUTO">Auto-detect</option>
+                                <option value="US">United States</option>
+                                <option value="EU">Europe</option>
+                                <option value="ASIA">Asia</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Preferred Chain:
+                            <select 
+                                value={userPreferences.preferredChain || ''} 
+                                onChange={(e) => updatePreferences({preferredChain: e.target.value})}
+                            >
+                                <option value="ethereum">Ethereum</option>
+                                <option value="hypereum">HyperEVM</option>
+                                <option value="polygon">Polygon</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    {/* Smart Connect Button */}
+                    <div style={{textAlign: 'center', margin: '30px 0'}}>
+                        <button 
+                            className="smart-connect-btn"
+                            onClick={handleSmartConnect}
+                            disabled={connected}
+                        >
+                            {connected ? '✅ Wallet Connected' : '🧠 Smart Connect Wallet'}
+                        </button>
+                    </div>
+
+                    {/* Dynamic Wallet Options */}
+                    <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'center'}}>
+                        {availableWallets.map(wallet => (
+                            <button
+                                key={wallet}
+                                onClick={() => handleConnectSpecificWallet(wallet)}
+                                className={`wallet-option ${getDynamicWalletList(userPreferences, availableWallets).slice(0, 2).includes(wallet) ? 'preferred' : ''}`}
+                                disabled={connected}
+                            >
+                                {wallet.replace('_', ' ').toUpperCase()}
+                                {getDynamicWalletList(userPreferences, availableWallets).slice(0, 2).includes(wallet) && ' ⭐'}
+                            </button>
+                        ))}
+                    </div>
+
+                    {connected && (
+                        <div className="config-status" style={{marginTop: '20px'}}>
+                            <p>🎉 Wallet connected successfully!</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<SmartWalletSelector />, document.getElementById('dynamic-privy-app'));
+    </script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</body>
+</html>
