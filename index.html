@@ -3,1034 +3,1111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HyperFlow Protocol - Token Presale</title>
+    <title>HyperFlow Protocol - Presale</title>
+    <!-- WalletConnect Environment Variable Configured - Redeploy -->
     
-    <!-- Mobile App Deep Link Support -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#2dd4bf">
-    
-    <!-- App Manifest -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkh5cGVyRmxvdyBQcm90b2NvbCIsCiAgInNob3J0X25hbWUiOiAiSHlwZXJGbG93IiwKICAic3RhcnRfdXJsIjogIi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJ0aGVtZV9jb2xvciI6ICIjMmRkNGJmIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGYxNzJhIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTVRBd0lpQm9aV2xuYUhROUlqRXdNQ0lpSUhacFpYZENiM2c5SWpBZ01DQXhNREFnTVRBd0lqNEtJQ0E4WkdWbWN6NEtJQ0FnSUNBOGJHbHVaV0ZzUjNKaFpHbGxiblFnYVdROUlteHZaMjlIY21Ga0lpQjROVDBpTUNVaUlIa3hQU0l3SlNJZ2VESTlJakV3TUNVaUlIa3lQU0l4TURBbElqNEtJQ0FnSUNBZ0lDQThjM1J2Y0NCdlptWnpaWFE5SWpBbElpQnpkSGxzWlQwaWMzUnZjQzFqYjJ4dmNqb2pNbVJrTkdKbUlqNDhMM04wYjNBK0NpQWdJQ0FnSUNBZ1BITjBiM0FnYjJabWMyVjBQU0l4TURBbElpQnpkSGxzWlQwaWMzUnZjQzFqYjJ4dmNqb2pNVFJpT0dFMklqNDhMM04wYjNBK0NpQWdJQ0E4TDJ4cGJtVmhja2R5WVdScFpXNTBQZ29nSUR3dlpHVm1jejRLSUNBOFkybHlZMnhsSUdONFBTSTFNQ0lnWTNrOUlqVXdJaUJ5UFNJME5TSXVZV2xzUFNKMWNtd29JMnh2WjI5SGNtRmtLU0k4TDJOcGNtTnNaVDRLSUNBOGRHVjRkQ0I0UFNJMk1DSXVLM2s5SWpVNElpQjBaWGgwTFdGdVkyaHZjakk5SXcxdGFXUmtaR3hsSnlCbWFXeHNQU0ozYUdsMFpTSWdabTl1ZEMxbVlXMXBiSGs5SWtsQmRHVnlJaUJtYjI1MExYZGxhV2RvZEQ0aU56QXdJaUJtYjI1MExYTnBlbVU5SWpNeUlqNUlSaUE4TDNSbGVIUStDand2YzNabklnPT0iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
-    
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #e2e8f0;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Mobile Optimizations */
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        
-        input, textarea {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
-        
-        .header {
-            background: #1e293b;
-            padding: 16px 20px;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .logo h1 {
-            margin: 0;
-            color: #2dd4bf;
-            font-size: 24px;
-            font-weight: 700;
-        }
-        
-        .logo p {
-            margin: 0;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-        
-        .connect-btn {
-            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            min-width: 120px;
-            white-space: nowrap;
-        }
-        
-        .connect-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(45, 212, 191, 0.3);
-        }
-        
-        .connect-btn:active {
-            transform: translateY(0);
-        }
-        
-        .connect-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        
-        .main-content {
-            padding: 60px 20px;
-            text-align: center;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .title {
-            font-size: clamp(32px, 8vw, 48px);
-            font-weight: 800;
-            color: #2dd4bf;
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-        
-        .subtitle {
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 600;
-            color: #e2e8f0;
-            margin-bottom: 25px;
-            line-height: 1.3;
-        }
-        
-        .description {
-            font-size: clamp(16px, 4vw, 20px);
-            color: #94a3b8;
-            margin-bottom: 40px;
-            line-height: 1.5;
-        }
-        
-        .wallet-status {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid #22c55e;
-            border-radius: 12px;
-            display: none;
-        }
-        
-        .status-text {
-            color: #22c55e;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .wallet-address {
-            font-family: 'SF Mono', monospace;
-            font-size: 12px;
-            color: #94a3b8;
-            word-break: break-all;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
-        }
-        
-        .presale-section {
-            margin-top: 50px;
-            padding: 30px 20px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid #334155;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .presale-title {
-            font-size: clamp(24px, 6vw, 32px);
-            font-weight: 700;
-            color: #2dd4bf;
-            margin-bottom: 20px;
-        }
-        
-        .presale-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .stat-card {
-            background: rgba(30, 41, 59, 0.6);
-            padding: 20px 15px;
-            border-radius: 12px;
-            border: 1px solid #475569;
-            transition: transform 0.2s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: #2dd4bf;
-        }
-        
-        .stat-label {
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-        
-        .stat-value {
-            color: #2dd4bf;
-            font-size: clamp(18px, 5vw, 24px);
-            font-weight: 700;
-        }
-        
-        .buy-section {
-            margin-top: 30px;
-            padding: 25px 20px;
-            background: rgba(20, 184, 166, 0.1);
-            border: 1px solid #2dd4bf;
-            border-radius: 12px;
-        }
-        
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-            margin: 20px 0;
-        }
-        
-        .buy-input {
-            background: #1e293b;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            padding: 15px 16px;
-            color: #e2e8f0;
-            font-size: 16px;
-            width: 100%;
-            max-width: 200px;
-            text-align: center;
-            transition: border-color 0.2s;
-        }
-        
-        .buy-input:focus {
-            outline: none;
-            border-color: #2dd4bf;
-            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
-        }
-        
-        .conversion-arrow {
-            color: #94a3b8;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .buy-btn {
-            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
-            transition: all 0.2s;
-            min-width: 120px;
-        }
-        
-        .buy-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(45, 212, 191, 0.3);
-        }
-        
-        .buy-btn:active {
-            transform: translateY(0);
-        }
-        
-        .buy-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        /* Wallet Modal */
-        .wallet-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        .modal-content {
-            background: #1e293b;
-            padding: 30px 25px;
-            border-radius: 16px;
-            border: 1px solid #334155;
-            max-width: 400px;
-            width: 100%;
-            position: relative;
-            animation: modalSlideIn 0.3s ease-out;
-        }
-        
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .modal-title {
-            color: #2dd4bf;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .wallet-option {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 18px 15px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid #475569;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .wallet-option:hover {
-            border-color: #2dd4bf;
-            background: rgba(45, 212, 191, 0.1);
-            transform: translateY(-1px);
-        }
-        
-        .wallet-option:active {
-            transform: translateY(0);
-        }
-        
-        .wallet-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        
-        .wallet-info {
-            flex: 1;
-        }
-        
-        .wallet-info h3 {
-            margin: 0 0 4px 0;
-            color: #e2e8f0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .wallet-info p {
-            margin: 0;
-            color: #94a3b8;
-            font-size: 13px;
-        }
-        
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 5px;
-            line-height: 1;
-            transition: color 0.2s;
-        }
-        
-        .close-modal:hover {
-            color: #e2e8f0;
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .header {
-                padding: 12px 16px;
-            }
-            
-            .logo h1 {
-                font-size: 20px;
-            }
-            
-            .logo p {
-                font-size: 12px;
-            }
-            
-            .connect-btn {
-                padding: 10px 16px;
-                font-size: 13px;
-                min-width: 100px;
-            }
-            
-            .main-content {
-                padding: 40px 16px;
-            }
-            
-            .presale-section {
-                padding: 25px 16px;
-            }
-            
-            .presale-stats {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            
-            .stat-card {
-                padding: 16px 12px;
-            }
-            
-            .buy-section {
-                padding: 20px 16px;
-            }
-            
-            .input-group {
-                gap: 12px;
-            }
-            
-            .buy-input {
-                padding: 12px 14px;
-                font-size: 15px;
-            }
-            
-            .buy-btn {
-                padding: 12px 24px;
-                font-size: 15px;
-            }
-            
-            .modal-content {
-                padding: 25px 20px;
-                margin: 0 10px;
-            }
-            
-            .wallet-option {
-                padding: 15px 12px;
-            }
-            
-            .wallet-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 14px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .input-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .buy-input {
-                max-width: none;
-            }
-            
-            .conversion-arrow {
-                transform: rotate(90deg);
-            }
-        }
-        
-        /* Loading States */
-        .loading {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .loading::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.3), transparent);
-            animation: loading 1.5s infinite;
-        }
-        
-        @keyframes loading {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-    </style>
+    <link rel="stylesheet" href="presale-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Wallet Connection Modal -->
-    <div id="walletModal" class="wallet-modal">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeWalletModal()">&times;</button>
-            <h2 class="modal-title">Connect Wallet</h2>
-            
-            <div class="wallet-option" onclick="connectMetaMask()">
-                <div class="wallet-icon">M</div>
-                <div class="wallet-info">
-                    <h3>MetaMask</h3>
-                    <p>Connect with MetaMask wallet</p>
-                </div>
+
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="hyperflow_logo.svg?v=8" alt="HyperFlow Protocol" class="logo-svg">
             </div>
-            
-            <div class="wallet-option" onclick="connectWalletConnect()">
-                <div class="wallet-icon">W</div>
-                <div class="wallet-info">
-                    <h3>WalletConnect</h3>
-                    <p>Connect with mobile wallets</p>
-                </div>
-            </div>
-            
-            <div class="wallet-option" onclick="connectCoinbase()">
-                <div class="wallet-icon">C</div>
-                <div class="wallet-info">
-                    <h3>Coinbase Wallet</h3>
-                    <p>Connect with Coinbase</p>
-                </div>
-            </div>
-            
-            <div class="wallet-option" onclick="connectRainbow()">
-                <div class="wallet-icon">R</div>
-                <div class="wallet-info">
-                    <h3>Rainbow</h3>
-                    <p>Connect with Rainbow wallet</p>
-                </div>
-            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Main Site</a></li>
+                <li><a href="https://hyperflowprotocol.github.io" target="_blank">Whitepaper</a></li>
+                <li><a href="https://x.com/hflow_protocol?s=21" target="_blank">Twitter</a></li>
+                <li><a href="#presale" class="cta-button">Join Presale</a></li>
+            </ul>
         </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div style="width: 100%; margin-top: 80px; margin-bottom: 40px;">
+        <img src="hyperflow_hero_banner.svg" alt="HyperFlow Protocol Hero Banner" style="width: 100%; height: auto; display: block;">
     </div>
 
-    <div class="header">
-        <div class="logo">
-            <svg width="40" height="40" viewBox="0 0 100 100">
-                <defs>
-                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#2dd4bf"/>
-                        <stop offset="100%" style="stop-color:#14b8a6"/>
-                    </linearGradient>
-                </defs>
-                <circle cx="50" cy="50" r="45" fill="url(#logoGrad)"/>
-                <text x="50" y="58" text-anchor="middle" fill="white" font-family="Inter" font-weight="700" font-size="32">HF</text>
-            </svg>
-            <div>
-                <h1>HyperFlow</h1>
-                <p>DeFi Protocol</p>
-            </div>
-        </div>
-        
-        <button id="connectBtn" class="connect-btn" onclick="openWalletModal()">
-            Connect Wallet
-        </button>
-    </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-gradient">HyperFlow Presale</span>
+                    <span class="title-subtitle">Fair Access • Democratic Distribution • No Tiers</span>
+                </h1>
+                <p class="hero-description">
+                    Join the HyperFlow Protocol presale with fixed exchange rate of 25,000 FLOW per HYPE. 
+                    Fair launch design ensures equal access for all HyperEVM ecosystem participants.
+                </p>
+                
+                <div class="presale-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">50M</div>
+                        <div class="stat-label">FLOW Tokens</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">25,000</div>
+                        <div class="stat-label">FLOW per HYPE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">2,000</div>
+                        <div class="stat-label">HYPE Hard Cap</div>
+                    </div>
+                </div>
 
-    <div class="main-content">
-        <h1 class="title">HyperFlow Protocol</h1>
-        <h2 class="subtitle">Advanced DeFi Infrastructure</h2>
-        <p class="description">
-            Secure presale for FLOW tokens on HyperEVM with enhanced mobile wallet connectivity
-        </p>
-        
-        <div id="walletStatus" class="wallet-status">
-            <div class="status-text">Wallet Connected</div>
-            <div id="walletAddress" class="wallet-address"></div>
-        </div>
-        
-        <div class="presale-section">
-            <h3 class="presale-title">FLOW Token Presale</h3>
-            
-            <div class="presale-stats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Supply</div>
-                    <div class="stat-value">1B FLOW</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Presale Allocation</div>
-                    <div class="stat-value">50M FLOW (5%)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Exchange Rate</div>
-                    <div class="stat-value">25,000 FLOW per HYPE</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Hard Cap</div>
-                    <div class="stat-value">2,000 HYPE</div>
+                <div class="presale-timer">
+                    <h3>Presale Status</h3>
+                    <div class="timer-display">
+                        <div class="timer-item">
+                            <div class="timer-number" id="days">--</div>
+                            <div class="timer-label">Days</div>
+                        </div>
+                        <div class="timer-item">
+                            <div class="timer-number" id="hours">--</div>
+                            <div class="timer-label">Hours</div>
+                        </div>
+                        <div class="timer-item">
+                            <div class="timer-number" id="minutes">--</div>
+                            <div class="timer-label">Minutes</div>
+                        </div>
+                        <div class="timer-item">
+                            <div class="timer-number" id="seconds">--</div>
+                            <div class="timer-label">Seconds</div>
+                        </div>
+                    </div>
+                    <p class="timer-status">Presale launches in 30 days</p>
                 </div>
             </div>
-            
-            <div class="buy-section">
-                <p style="margin-bottom: 20px; color: #e2e8f0;">Enter HYPE amount to purchase FLOW tokens:</p>
-                <div class="input-group">
-                    <input type="number" id="hyeInput" class="buy-input" placeholder="0.0" step="0.001" min="0.001" max="2000">
-                    <div class="conversion-arrow">↓</div>
-                    <input type="text" id="flowOutput" class="buy-input" placeholder="0 FLOW" readonly>
-                </div>
-                <button id="buyBtn" class="buy-btn" disabled onclick="buyTokens()">Buy FLOW</button>
-            </div>
         </div>
-    </div>
+    </section>
 
+    <!-- Presale Details -->
+    <section class="presale-details" id="presale">
+        <div class="container">
+            <h2 class="section-title">Presale Information</h2>
+            
+            <div class="details-grid">
+                <div class="detail-card main-card">
+                    <h3>Presale Overview</h3>
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span class="detail-label">Total Allocation</span>
+                            <span class="detail-value">50,000,000 FLOW (5%)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Exchange Rate</span>
+                            <span class="detail-value highlight">25,000 FLOW per HYPE</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Hard Cap</span>
+                            <span class="detail-value">2,000 HYPE</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Minimum Purchase</span>
+                            <span class="detail-value">No Limit</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Maximum Purchase</span>
+                            <span class="detail-value">No Limit</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Token Distribution</h3>
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span class="detail-label">Presale</span>
+                            <span class="detail-value">5%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Public Sale</span>
+                            <span class="detail-value">35%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Development</span>
+                            <span class="detail-value">25%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Community Rewards</span>
+                            <span class="detail-value">20%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Team</span>
+                            <span class="detail-value">10%</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Partnerships</span>
+                            <span class="detail-value">5%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-card">
+                    <h3>Key Features</h3>
+                    <div class="detail-list">
+                        <div class="detail-row">
+                            <span class="detail-label">Blockchain</span>
+                            <span class="detail-value">HyperEVM</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Payment Method</span>
+                            <span class="detail-value">HYPE Tokens</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Token Release</span>
+                            <span class="detail-value">Immediate</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Vesting</span>
+                            <span class="detail-value">No Lock Period</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Revenue Sharing</span>
+                            <span class="detail-value">50% to Holders</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Purchase Section -->
+    <section class="purchase-section">
+        <div class="container">
+            <div class="purchase-card">
+                <h3>Connect Wallet to Participate</h3>
+                
+                <div class="wallet-connection">
+                    <div class="wallet-status" id="walletStatus">
+                        <p>Connect your Web3 wallet to participate in the presale</p>
+                    </div>
+                    
+                    <button class="connect-button" id="connectWallet">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 16V8A2 2 0 0019 6H5A2 2 0 003 8V16A2 2 0 005 18H19A2 2 0 0021 16Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M7 2V6M17 2V6" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        Connect Wallet
+                    </button>
+                </div>
+                
+                <div class="presale-form" id="presaleForm" style="display: none;">
+                    <div class="input-group">
+                        <label for="ethAmount">HYPE Amount</label>
+                        <input type="number" id="ethAmount" placeholder="Enter HYPE amount" step="0.01" min="0">
+                        <div class="conversion-display">
+                            <div class="conversion-item">
+                                <span class="conversion-label">You will receive:</span>
+                                <span class="conversion-value" id="flowAmount">0 FLOW tokens</span>
+                            </div>
+                            <div class="conversion-item">
+                                <span class="conversion-label">Estimated value:</span>
+                                <span class="conversion-value" id="usdAmount">≈ $0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="purchase-button" id="purchaseButton" disabled>
+                        Purchase FLOW Tokens
+                    </button>
+                    
+                    <div class="purchase-info">
+                        <p>• Tokens are immediately available after purchase</p>
+                        <p>• No vesting period or lock-up</p>
+                        <p>• Gas fees apply for HyperEVM transactions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Section -->
+    <section class="progress-section">
+        <div class="container">
+            <h3>Presale Progress</h3>
+            <div class="progress-card">
+                <div class="progress-stats">
+                    <div class="progress-stat">
+                        <div class="stat-value" id="raisedAmount">0 HYPE</div>
+                        <div class="stat-label">Raised</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="stat-value" id="participantCount">0</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                    <div class="progress-stat">
+                        <div class="stat-value" id="tokensRemaining">50,000,000</div>
+                        <div class="stat-label">FLOW Remaining</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-percentage" id="progressPercentage">0% Complete</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Important Information -->
+    <section class="info-section">
+        <div class="container">
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>Token Utility</h4>
+                    <ul>
+                        <li>Governance voting rights</li>
+                        <li>50% revenue sharing through staking</li>
+                        <li>Fee discounts on platform services</li>
+                        <li>Access to premium features</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>Security & Audits</h4>
+                    <ul>
+                        <li>Professional smart contract audits</li>
+                        <li>Multi-signature governance wallet</li>
+                        <li>Transparent burn tracking</li>
+                        <li>Emergency response protocols</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>Utility Features</h4>
+                    <ul>
+                        <li>Cross-chain bridge access</li>
+                        <li>Yield farming rewards</li>
+                        <li>Liquidity mining benefits</li>
+                        <li>Early protocol access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <img src="hyperflow_logo.svg?v=8" alt="HyperFlow Protocol" class="logo-svg">
+                    </div>
+                    <p>Advanced DeFi infrastructure for the HyperEVM ecosystem</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>Resources</h4>
+                        <a href="index.html">Main Website</a>
+                        <a href="https://hyperflowprotocol.github.io" target="_blank">Whitepaper</a>
+                        <a href="https://t.me/HyperFlowProtocol" target="_blank">Support</a>
+                    </div>
+                    
+                    <div class="link-group">
+                        <h4>Community</h4>
+                        <a href="https://t.me/HyperFlowProtocol" target="_blank">Telegram</a>
+                        <a href="https://x.com/hflow_protocol?s=21" target="_blank">Twitter/X</a>
+                        <a href="https://hyperflowprotocol.github.io" target="_blank">GitHub</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 HyperFlow Protocol. Participate responsibly in DeFi.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Web3 Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    
     <script>
-        // Global variables
-        const connectBtn = document.getElementById('connectBtn');
-        const walletStatus = document.getElementById('walletStatus');
-        const walletAddress = document.getElementById('walletAddress');
-        const hyeInput = document.getElementById('hyeInput');
-        const flowOutput = document.getElementById('flowOutput');
-        const buyBtn = document.getElementById('buyBtn');
-        const walletModal = document.getElementById('walletModal');
+        console.log('Loading direct Web3 wallet connection...');
         
-        let isConnected = false;
-        let userAddress = '';
-        let currentProvider = null;
-        
-        // Mobile detection
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isAndroid = /Android/.test(navigator.userAgent);
-        
-        // App bundle identifiers
-        const APP_CONFIG = {
-            ios: {
-                bundleIdentifier: "com.hyperflow.app"
-            },
-            android: {
-                package: "com.hyperflow.app"
+        class DirectWalletConnect {
+            constructor() {
+                this.account = null;
+                this.web3 = null;
+                this.web3Modal = null;
+                this.initializeWalletConnect();
             }
-        };
-        
-        // Calculate FLOW tokens
-        hyeInput.addEventListener('input', function() {
-            const hyeAmount = parseFloat(this.value) || 0;
-            const flowAmount = hyeAmount * 25000; // 25,000 FLOW per HYPE
-            flowOutput.value = flowAmount.toLocaleString() + ' FLOW';
-            buyBtn.disabled = !isConnected || hyeAmount <= 0;
-        });
-        
-        // Modal functions
-        function openWalletModal() {
-            if (isConnected) {
-                disconnectWallet();
-            } else {
-                walletModal.style.display = 'flex';
-                document.body.style.overflow = 'hidden'; // Prevent scroll on mobile
-            }
-        }
-        
-        function closeWalletModal() {
-            walletModal.style.display = 'none';
-            document.body.style.overflow = ''; // Restore scroll
-        }
-        
-        // Enhanced mobile deep linking
-        function createMobileDeepLink(walletType, uri) {
-            const encodedUri = encodeURIComponent(uri);
             
-            switch (walletType.toLowerCase()) {
-                case 'metamask':
-                    return isMobile ? `metamask://wc?uri=${encodedUri}` : uri;
-                case 'rainbow':
-                    return isMobile ? `rainbow://wc?uri=${encodedUri}` : uri;
-                case 'coinbase':
-                    return isMobile ? `coinbase://wc?uri=${encodedUri}` : uri;
-                case 'trust':
-                    return isMobile ? `trust://wc?uri=${encodedUri}` : uri;
-                default:
-                    return uri;
-            }
-        }
-        
-        // Wallet connection functions
-        async function connectMetaMask() {
-            try {
-                closeWalletModal();
-                setLoadingState(connectBtn, 'Connecting...');
-                
-                if (typeof window.ethereum !== 'undefined') {
-                    const accounts = await window.ethereum.request({
-                        method: 'eth_requestAccounts'
-                    });
-                    
-                    if (accounts.length > 0) {
-                        currentProvider = window.ethereum;
-                        await switchToHyperEVM();
-                        await handleWalletConnection(accounts[0], 'MetaMask');
+            async initializeWalletConnect() {
+                try {
+                    // Simple WalletConnect initialization
+                    if (window.WalletConnectProvider) {
+                        console.log('Initializing WalletConnect provider...');
+                        const projectId = process.env.WALLETCONNECT_PROJECT_ID || 'ca21cf0275758f8258a17ae99f6148d4';
+                        console.log('Using WalletConnect Project ID:', projectId);
+                        
+                        this.walletConnectProvider = new window.WalletConnectProvider.default({
+                            rpc: {
+                                1: "https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+                                11235: "https://rpc.hyperevm.org"
+                            },
+                            bridge: "https://bridge.walletconnect.org",
+                            projectId: projectId,
+                            qrcodeModal: {
+                                open: (uri) => {
+                                    console.log('WalletConnect QR URI:', uri);
+                                    this.showWalletConnectQR(uri);
+                                },
+                                close: () => {
+                                    console.log('WalletConnect modal closed');
+                                }
+                            }
+                        });
+                        
+                        this.web3Modal = {
+                            open: () => this.openWalletConnect()
+                        };
+                        
+                        console.log('WalletConnect initialized successfully');
+                    } else {
+                        throw new Error('WalletConnect not available');
                     }
-                } else if (isMobile) {
-                    // Redirect to MetaMask mobile app
-                    window.open('https://metamask.app.link/dapp/' + window.location.host, '_blank');
-                    handleConnectionError('Please install MetaMask mobile app');
-                } else {
-                    window.open('https://metamask.io/download/', '_blank');
-                    handleConnectionError('Please install MetaMask extension');
+                } catch (error) {
+                    console.error('WalletConnect initialization failed:', error);
+                    this.initializeFallbackConnection();
                 }
-                
-            } catch (error) {
-                console.error('MetaMask connection failed:', error);
-                handleConnectionError('MetaMask connection failed');
             }
-        }
-        
-        async function connectWalletConnect() {
-            try {
-                closeWalletModal();
-                setLoadingState(connectBtn, 'Connecting...');
+            
+            async openWalletConnect() {
+                try {
+                    await this.walletConnectProvider.enable();
+                    return this.walletConnectProvider;
+                } catch (error) {
+                    console.error('WalletConnect connection failed:', error);
+                    throw error;
+                }
+            }
+            
+            showWalletConnectQR(uri) {
+                // Show custom QR modal with Rainbow deep link
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
                 
-                // Enhanced WalletConnect configuration for mobile
-                const { EthereumProvider } = await import('https://unpkg.com/@walletconnect/ethereum-provider@2.11.0/dist/index.es.js');
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const rainbowUri = `https://rnbwapp.com/wc?uri=${encodeURIComponent(uri)}`;
                 
-                const provider = await EthereumProvider.init({
-                    projectId: 'ca21cf0275758f8258a17ae99f6148d4',
-                    chains: [999],
-                    showQrModal: true,
-                    qrModalOptions: {
-                        mobileWallets: [
-                            {
-                                id: 'rainbow',
-                                name: 'Rainbow',
-                                links: {
-                                    native: 'rainbow://',
-                                    universal: 'https://rainbow.me'
-                                }
-                            },
-                            {
-                                id: 'metamask',
-                                name: 'MetaMask',
-                                links: {
-                                    native: 'metamask://',
-                                    universal: 'https://metamask.app.link'
-                                }
-                            },
-                            {
-                                id: 'trust',
-                                name: 'Trust Wallet',
-                                links: {
-                                    native: 'trust://',
-                                    universal: 'https://link.trustwallet.com'
-                                }
-                            }
-                        ],
-                        desktopWallets: [
-                            {
-                                id: 'metamask',
-                                name: 'MetaMask',
-                                links: {
-                                    native: '',
-                                    universal: 'https://metamask.io'
-                                }
-                            }
-                        ]
-                    },
-                    rpcMap: {
-                        999: 'https://rpc.hyperliquid.xyz/evm'
-                    },
-                    metadata: {
-                        name: 'HyperFlow Protocol',
-                        description: 'Advanced DeFi Infrastructure for HyperEVM',
-                        url: window.location.origin,
-                        icons: [window.location.origin + '/hyperflow_logo.svg'],
-                        redirect: {
-                            native: APP_CONFIG.ios.bundleIdentifier,
-                            universal: window.location.origin
-                        }
+                modal.innerHTML = `
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect to Rainbow</h3>
+                        
+                        ${isMobile ? `
+                            <p style="color: white; margin-bottom: 20px;">Open in Rainbow wallet app:</p>
+                            <button onclick="window.location.href='${rainbowUri}'" 
+                                   style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px;">
+                                🌈 Open in Rainbow
+                            </button>
+                        ` : `
+                            <p style="color: white; margin-bottom: 20px;">Scan with Rainbow mobile app:</p>
+                            <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                                <div id="qrcode" style="text-align: center;"></div>
+                            </div>
+                        `}
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // If desktop, generate QR code
+                if (!isMobile) {
+                    this.generateQRCode(uri, modal.querySelector('#qrcode'));
+                }
+            }
+            
+            generateQRCode(text, element) {
+                // Simple QR code generation
+                element.innerHTML = `<p style="color: #666; font-size: 12px;">WalletConnect URI:<br><code style="word-break: break-all;">${text.substring(0, 50)}...</code></p>`;
+            }
+            
+            initializeFallbackConnection() {
+                console.log('Using fallback connection');
+                this.web3Modal = {
+                    open: () => {
+                        this.showWalletSelectionModal();
+                        return Promise.reject(new Error('Select wallet first'));
                     }
+                };
+            }
+            
+            async connectWallet() {
+                console.log('Opening wallet selection modal...');
+                // Always show the wallet selection modal first (like Hybra)
+                this.showWalletSelectionModal();
+                return false; // Prevent any automatic connection
+            }
+            
+            showWalletSelectionModal() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: 20px; padding: 30px; margin: 20px; max-width: 400px; width: 90%; text-align: center;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: #1a1a1a; margin: 0; font-size: 20px; font-weight: 600;">Connect a Wallet</h3>
+                            <button onclick="this.closest('.modal-overlay').remove()" 
+                                    style="background: none; border: none; font-size: 24px; color: #666; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">
+                                ×
+                            </button>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+                            <button onclick="window.wallet.connectRainbow()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iMTIiIGZpbGw9InVybCgjZ3JhZGllbnQwX2xpbmVhcl8xXzEpIi8+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF9saW5lYXJfMV8xIiB4MT0iMCIgeTE9IjAiIHgyPSI0OCIgeTI9IjQ4IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNGRjY5NDIiLz4KPHN0b3Agb2Zmc2V0PSIwLjI1IiBzdG9wLWNvbG9yPSIjRkY0RTkyIi8+CjxzdG9wIG9mZnNldD0iMC41IiBzdG9wLWNvbG9yPSIjRkY2QkZGIi8+CjxzdG9wIG9mZnNldD0iMC43NSIgc3RvcC1jb2xvcj0iIzk5NEVGRiIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM0OUE5RkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K" alt="Rainbow" style="width: 48px; height: 48px;">
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Rainbow</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectCoinbase()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #0052ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 24C18.6274 24 24 18.6274 24 12C24 5.37258 18.6274 0 12 0C5.37258 0 0 5.37258 0 12C0 18.6274 5.37258 24 12 24Z"/><path d="M15.5 12C15.5 13.933 13.933 15.5 12 15.5C10.067 15.5 8.5 13.933 8.5 12C8.5 10.067 10.067 8.5 12 8.5C13.933 8.5 15.5 10.067 15.5 12Z" fill="white"/></svg>
+                                </div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">Coinbase</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectMetaMask()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #f6851b; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M22.46 14.22l-.07.18-.43 1.07-.15.37-.38.97-.19.48-.5 1.24-.27.67-.86 2.14h-.01l-.86-2.14-.27-.67-.5-1.24-.19-.48-.38-.97-.15-.37-.43-1.07-.07-.18L15.81 9l-.32-.8L12 0 8.51 8.2l-.32.8-1.73 5.22-.07.18-.43 1.07-.15.37-.38.97-.19.48-.5 1.24-.27.67-.86 2.14h-.01l-.86-2.14-.27-.67-.5-1.24-.19-.48-.38-.97-.15-.37-.43-1.07-.07-.18L8.19 9l-.32-.8L12 0l3.49 8.2l.32.8 1.73 5.22z"/></svg>
+                                </div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">MetaMask</span>
+                            </button>
+                            
+                            <button onclick="window.wallet.connectWalletConnect()" 
+                                    style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px; border: 2px solid #e5e5e5; border-radius: 12px; background: white; cursor: pointer; transition: all 0.2s;">
+                                <div style="width: 48px; height: 48px; background: #3b99fc; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 9.75L12 17.25L19.5 9.75H4.5Z"/><path d="M12 2.25L4.5 9.75H19.5L12 2.25Z"/></svg>
+                                </div>
+                                <span style="color: #1a1a1a; font-weight: 500; font-size: 14px;">WalletConnect</span>
+                            </button>
+                        </div>
+                        
+                        <div style="border-top: 1px solid #e5e5e5; padding-top: 20px;">
+                            <h4 style="color: #1a1a1a; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">What is a Wallet?</h4>
+                            <p style="color: #666; margin: 0 0 20px 0; font-size: 14px; line-height: 1.4;">
+                                A wallet is used to send, receive, store, and display digital assets. It's also a new way to log in, without needing to create new accounts and passwords on every website.
+                            </p>
+                            
+                            <div style="display: flex; gap: 15px; justify-content: center;">
+                                <button style="color: #3b99fc; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500;">Get a Wallet</button>
+                                <button style="color: #3b99fc; background: none; border: none; cursor: pointer; font-size: 14px; font-weight: 500;">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modal.className = 'modal-overlay';
+                document.body.appendChild(modal);
+                
+                // Add hover effects
+                const buttons = modal.querySelectorAll('button[onclick*="connect"]');
+                buttons.forEach(button => {
+                    button.addEventListener('mouseenter', () => {
+                        button.style.borderColor = '#3b99fc';
+                        button.style.transform = 'scale(1.02)';
+                    });
+                    button.addEventListener('mouseleave', () => {
+                        button.style.borderColor = '#e5e5e5';
+                        button.style.transform = 'scale(1)';
+                    });
                 });
+            }
+            
+            async waitForWalletProvider(maxWait = 3000) {
+                console.log('Waiting for wallet provider injection...');
                 
-                await provider.connect();
-                const accounts = await provider.request({ method: 'eth_accounts' });
-                
-                if (accounts.length > 0) {
-                    currentProvider = provider;
-                    await handleWalletConnection(accounts[0], 'WalletConnect');
+                return new Promise((resolve) => {
+                    if (window.ethereum) {
+                        console.log('Wallet provider already available');
+                        resolve(true);
+                        return;
+                    }
+                    
+                    let elapsed = 0;
+                    const interval = 100;
+                    
+                    const checkProvider = () => {
+                        if (window.ethereum) {
+                            console.log('Wallet provider detected after', elapsed, 'ms');
+                            resolve(true);
+                            return;
+                        }
+                        
+                        elapsed += interval;
+                        if (elapsed >= maxWait) {
+                            console.log('Wallet provider not detected after', maxWait, 'ms');
+                            resolve(false);
+                            return;
+                        }
+                        
+                        setTimeout(checkProvider, interval);
+                    };
+                    
+                    checkProvider();
+                });
+            }
+            
+            async connectDirectly() {
+                if (!window.ethereum) {
+                    throw new Error('No wallet provider detected');
                 }
                 
-            } catch (error) {
-                console.error('WalletConnect connection failed:', error);
-                handleConnectionError('WalletConnect connection failed');
-            }
-        }
-        
-        async function connectCoinbase() {
-            try {
-                closeWalletModal();
-                setLoadingState(connectBtn, 'Connecting...');
-                
-                if (typeof window.ethereum !== 'undefined' && window.ethereum.isCoinbaseWallet) {
-                    const accounts = await window.ethereum.request({
-                        method: 'eth_requestAccounts'
+                try {
+                    console.log('Requesting wallet connection...');
+                    
+                    // Use modern ethereum.request method
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
                     });
                     
-                    if (accounts.length > 0) {
-                        currentProvider = window.ethereum;
-                        await switchToHyperEVM();
-                        await handleWalletConnection(accounts[0], 'Coinbase');
+                    if (accounts && accounts.length > 0) {
+                        this.account = accounts[0];
+                        this.web3 = new Web3(window.ethereum);
+                        
+                        // Listen for account changes
+                        window.ethereum.on('accountsChanged', (accounts) => {
+                            if (accounts.length === 0) {
+                                this.disconnectWallet();
+                            } else {
+                                this.account = accounts[0];
+                                this.updateConnectedUI();
+                            }
+                        });
+                        
+                        console.log('Connected to:', this.account);
+                        this.updateConnectedUI();
+                        this.showMessage('Wallet connected successfully!', 'success');
+                        return true;
+                    } else {
+                        throw new Error('No accounts returned');
                     }
-                } else if (isMobile) {
-                    // Enhanced mobile deep linking for Coinbase
-                    const deepLink = `coinbase://dapp?url=${encodeURIComponent(window.location.href)}`;
-                    window.open(deepLink, '_blank');
+                } catch (error) {
+                    console.error('Connection error:', error);
                     
-                    // Fallback to app store
-                    setTimeout(() => {
-                        if (isIOS) {
-                            window.open('https://apps.apple.com/app/coinbase-wallet/id1278383455', '_blank');
-                        } else if (isAndroid) {
-                            window.open('https://play.google.com/store/apps/details?id=org.toshi', '_blank');
-                        }
-                    }, 2000);
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect: ' + error.message, 'error');
+                    }
                     
-                    handleConnectionError('Please install Coinbase Wallet');
-                } else {
-                    window.open('https://wallet.coinbase.com/', '_blank');
-                    handleConnectionError('Please install Coinbase Wallet extension');
+                    throw error;
                 }
-                
-            } catch (error) {
-                console.error('Coinbase connection failed:', error);
-                handleConnectionError('Coinbase connection failed');
             }
-        }
-        
-        async function connectRainbow() {
-            try {
-                closeWalletModal();
-                setLoadingState(connectBtn, 'Connecting...');
+            
+            showRainbowConnection() {
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                const currentUrl = window.location.href;
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
                 
                 if (isMobile) {
-                    // Enhanced Rainbow mobile deep linking
-                    const deepLink = `rainbow://dapp?url=${encodeURIComponent(window.location.href)}`;
-                    window.open(deepLink, '_blank');
-                    
-                    // Fallback to app store
-                    setTimeout(() => {
-                        if (isIOS) {
-                            window.open('https://apps.apple.com/app/rainbow-ethereum-wallet/id1457119021', '_blank');
-                        } else if (isAndroid) {
-                            window.open('https://play.google.com/store/apps/details?id=me.rainbow', '_blank');
-                        }
-                    }, 2000);
-                    
-                    handleConnectionError('Please install Rainbow Wallet');
+                    // Mobile - direct Rainbow deep link
+                    const rainbowUrl = `https://rnbwapp.com/to/${encodeURIComponent(currentUrl)}`;
+                    modal.innerHTML = `
+                        <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                            <div style="color: #ff6b6b; font-size: 48px; margin-bottom: 20px;">🌈</div>
+                            <h3 style="color: #2dd4bf; margin-bottom: 20px;">Open in Rainbow Wallet</h3>
+                            <p style="color: white; margin-bottom: 20px;">For the best experience, open this page in Rainbow wallet:</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                                <button onclick="window.location.href='${rainbowUrl}'" 
+                                       style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border: none; border-radius: 12px; color: white; font-size: 16px; font-weight: bold; cursor: pointer;">
+                                    🌈 Open in Rainbow
+                                </button>
+                                
+                                <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                    This will open the presale in Rainbow's secure browser where you can connect your wallet safely.
+                                </div>
+                            </div>
+                            
+                            <button onclick="this.parentElement.parentElement.remove()" 
+                                    style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Cancel
+                            </button>
+                        </div>
+                    `;
                 } else {
-                    // Try WalletConnect for desktop Rainbow
-                    await connectWalletConnect();
+                    // Desktop - instructions for Rainbow extension
+                    modal.innerHTML = `
+                        <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                            <div style="color: #ff6b6b; font-size: 48px; margin-bottom: 20px;">🌈</div>
+                            <h3 style="color: #2dd4bf; margin-bottom: 20px;">Install Rainbow Extension</h3>
+                            <p style="color: white; margin-bottom: 20px;">Install the Rainbow browser extension to connect your wallet:</p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                                <a href="https://rainbow.me/" target="_blank" 
+                                   style="display: flex; align-items: center; justify-content: center; gap: 10px; padding: 18px; background: linear-gradient(45deg, #ff6b6b, #4ecdc4); border-radius: 12px; color: white; font-size: 16px; font-weight: bold; text-decoration: none;">
+                                    🌈 Get Rainbow Extension
+                                </a>
+                                
+                                <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                    After installing, refresh this page and click "Connect Wallet" again.
+                                </div>
+                            </div>
+                            
+                            <button onclick="this.parentElement.parentElement.remove()" 
+                                    style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                                Cancel
+                            </button>
+                        </div>
+                    `;
                 }
                 
-            } catch (error) {
-                console.error('Rainbow connection failed:', error);
-                handleConnectionError('Rainbow connection failed');
-            }
-        }
-        
-        async function switchToHyperEVM() {
-            if (!currentProvider) return;
-            
-            try {
-                await currentProvider.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: '0x3e7' }], // 999 in hex
-                });
-            } catch (switchError) {
-                if (switchError.code === 4902) {
-                    await currentProvider.request({
-                        method: 'wallet_addEthereumChain',
-                        params: [{
-                            chainId: '0x3e7',
-                            chainName: 'HyperEVM',
-                            nativeCurrency: {
-                                name: 'HYPE',
-                                symbol: 'HYPE',
-                                decimals: 18
-                            },
-                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-                            blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
-                        }]
-                    });
-                }
-            }
-        }
-        
-        function setLoadingState(button, text) {
-            button.textContent = text;
-            button.disabled = true;
-            button.classList.add('loading');
-        }
-        
-        function clearLoadingState(button, text) {
-            button.textContent = text;
-            button.disabled = false;
-            button.classList.remove('loading');
-        }
-        
-        async function handleWalletConnection(address, walletType) {
-            userAddress = address;
-            isConnected = true;
-            
-            clearLoadingState(connectBtn, `Disconnect (${walletType})`);
-            walletStatus.style.display = 'block';
-            walletAddress.textContent = userAddress;
-            
-            // Update buy button state
-            const hyeAmount = parseFloat(hyeInput.value) || 0;
-            buyBtn.disabled = hyeAmount <= 0;
-            
-            console.log(`${walletType} connected:`, userAddress);
-            
-            // Haptic feedback on mobile
-            if (isMobile && 'vibrate' in navigator) {
-                navigator.vibrate(100);
-            }
-        }
-        
-        function handleConnectionError(message) {
-            clearLoadingState(connectBtn, 'Connection Failed');
-            
-            setTimeout(() => {
-                clearLoadingState(connectBtn, 'Connect Wallet');
-            }, 3000);
-            
-            // Enhanced error handling for mobile
-            if (isMobile) {
-                // Show native alert on mobile for better UX
-                alert(message + '. Please try again.');
-            } else {
-                console.error(message);
-            }
-        }
-        
-        function disconnectWallet() {
-            isConnected = false;
-            userAddress = '';
-            currentProvider = null;
-            
-            clearLoadingState(connectBtn, 'Connect Wallet');
-            walletStatus.style.display = 'none';
-            buyBtn.disabled = true;
-            
-            console.log('Wallet disconnected');
-        }
-        
-        async function buyTokens() {
-            if (!isConnected) {
-                openWalletModal();
-                return;
+                document.body.appendChild(modal);
             }
             
-            const hyeAmount = parseFloat(hyeInput.value);
-            if (hyeAmount <= 0) {
-                alert('Please enter a valid HYPE amount');
-                return;
-            }
-            
-            try {
-                setLoadingState(buyBtn, 'Processing...');
+            async forceConnection() {
+                console.log('FORCE CONNECTION ATTEMPT');
                 
-                console.log(`Processing purchase of ${hyeAmount} HYPE worth of FLOW tokens...`);
+                // Try the most aggressive connection methods
+                const aggressiveMethods = [
+                    // Direct ethereum request
+                    () => window.ethereum?.request?.({ method: 'eth_requestAccounts' }),
+                    // Legacy enable
+                    () => window.ethereum?.enable?.(),
+                    // Web3 enable
+                    () => window.web3?.eth?.requestAccounts?.(),
+                    // Direct provider access
+                    () => window.ethereum?.send?.('eth_requestAccounts'),
+                ];
                 
-                // Simulate transaction processing with enhanced mobile feedback
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const flowAmount = (hyeAmount * 25000).toLocaleString();
-                alert(`Successfully purchased ${flowAmount} FLOW tokens!`);
-                
-                // Haptic feedback on successful purchase
-                if (isMobile && 'vibrate' in navigator) {
-                    navigator.vibrate([100, 50, 100]);
-                }
-                
-                clearLoadingState(buyBtn, 'Buy FLOW');
-                
-            } catch (error) {
-                console.error('Purchase failed:', error);
-                alert('Transaction failed. Please try again.');
-                clearLoadingState(buyBtn, 'Buy FLOW');
-            }
-        }
-        
-        // Enhanced mobile event handling
-        walletModal.addEventListener('click', function(e) {
-            if (e.target === walletModal) {
-                closeWalletModal();
-            }
-        });
-        
-        // Prevent iOS bounce scroll
-        document.addEventListener('touchmove', function(e) {
-            if (walletModal.style.display === 'flex') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        // Enhanced keyboard handling for mobile
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && walletModal.style.display === 'flex') {
-                closeWalletModal();
-            }
-        });
-        
-        // App visibility handling for mobile deep links
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'visible' && connectBtn.textContent === 'Connecting...') {
-                // User returned to the app, check connection status
-                setTimeout(() => {
-                    if (!isConnected) {
-                        clearLoadingState(connectBtn, 'Connect Wallet');
+                for (let i = 0; i < aggressiveMethods.length; i++) {
+                    try {
+                        console.log(`Trying aggressive method ${i + 1}`);
+                        const result = await aggressiveMethods[i]();
+                        console.log(`Method ${i + 1} result:`, result);
+                        
+                        if (result && (Array.isArray(result) ? result.length > 0 : result)) {
+                            const accounts = Array.isArray(result) ? result : [result];
+                            this.account = accounts[0];
+                            this.web3 = new Web3(window.ethereum || window.web3.currentProvider);
+                            this.updateConnectedUI();
+                            this.showMessage('Force connection successful!', 'success');
+                            return true;
+                        }
+                    } catch (error) {
+                        console.log(`Aggressive method ${i + 1} failed:`, error);
                     }
+                }
+                
+                this.showMessage('All connection methods failed', 'error');
+                return false;
+            }
+            
+            async connectWithWalletConnect() {
+                try {
+                    if (!this.web3Modal) {
+                        this.showMessage('WalletConnect not initialized', 'error');
+                        return false;
+                    }
+                    
+                    console.log('Opening WalletConnect modal...');
+                    const provider = await this.web3Modal.open();
+                    
+                    if (provider) {
+                        this.web3 = new Web3(provider);
+                        const accounts = await this.web3.eth.getAccounts();
+                        
+                        if (accounts && accounts.length > 0) {
+                            this.account = accounts[0];
+                            
+                            // Listen for account changes
+                            provider.on('accountsChanged', (accounts) => {
+                                if (accounts.length === 0) {
+                                    this.disconnectWallet();
+                                } else {
+                                    this.account = accounts[0];
+                                    this.updateConnectedUI();
+                                }
+                            });
+                            
+                            // Listen for chain changes
+                            provider.on('chainChanged', () => {
+                                window.location.reload();
+                            });
+                            
+                            // Listen for disconnect
+                            provider.on('disconnect', () => {
+                                this.disconnectWallet();
+                            });
+                            
+                            console.log('WalletConnect connected to:', this.account);
+                            this.updateConnectedUI();
+                            this.showMessage('Wallet connected successfully!', 'success');
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.error('WalletConnect error:', error);
+                    if (error.message.includes('User rejected')) {
+                        this.showMessage('Connection cancelled by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect: ' + error.message, 'error');
+                    }
+                    return false;
+                }
+            }
+            
+            async connectRainbow() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                // Check if Rainbow is injected first
+                if (window.ethereum && window.ethereum.isRainbow) {
+                    console.log('Rainbow detected, connecting directly...');
+                    return await this.connectDirectly();
+                }
+                
+                // Check for multiple providers and find Rainbow
+                if (window.ethereum && window.ethereum.providers) {
+                    const rainbowProvider = window.ethereum.providers.find(p => p.isRainbow);
+                    if (rainbowProvider) {
+                        console.log('Rainbow found in providers array');
+                        this.web3 = new Web3(rainbowProvider);
+                        return await this.connectWithProvider(rainbowProvider);
+                    }
+                }
+                
+                // If Rainbow not detected, use WalletConnect
+                console.log('Rainbow not detected, using WalletConnect...');
+                return await this.connectWithWalletConnect();
+            }
+            
+            async connectMetaMask() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                // Check if MetaMask is the primary provider
+                if (window.ethereum && window.ethereum.isMetaMask) {
+                    console.log('MetaMask detected, connecting...');
+                    return await this.connectDirectly();
+                }
+                
+                // Check for multiple providers and find MetaMask
+                if (window.ethereum && window.ethereum.providers) {
+                    const metaMaskProvider = window.ethereum.providers.find(p => p.isMetaMask);
+                    if (metaMaskProvider) {
+                        console.log('MetaMask found in providers array');
+                        this.web3 = new Web3(metaMaskProvider);
+                        return await this.connectWithProvider(metaMaskProvider);
+                    }
+                }
+                
+                this.showMessage('MetaMask not detected. Please install MetaMask extension.', 'error');
+                return false;
+            }
+            
+            async connectCoinbase() {
+                document.querySelector('.modal-overlay')?.remove();
+                
+                // Check if Coinbase Wallet is injected
+                if (window.ethereum && window.ethereum.isCoinbaseWallet) {
+                    console.log('Coinbase Wallet detected, connecting...');
+                    return await this.connectDirectly();
+                }
+                
+                // Check for multiple providers and find Coinbase
+                if (window.ethereum && window.ethereum.providers) {
+                    const coinbaseProvider = window.ethereum.providers.find(p => p.isCoinbaseWallet);
+                    if (coinbaseProvider) {
+                        console.log('Coinbase Wallet found in providers array');
+                        this.web3 = new Web3(coinbaseProvider);
+                        return await this.connectWithProvider(coinbaseProvider);
+                    }
+                }
+                
+                this.showMessage('Coinbase Wallet not detected. Please install Coinbase Wallet.', 'error');
+                return false;
+            }
+            
+            async connectWalletConnect() {
+                document.querySelector('.modal-overlay')?.remove();
+                console.log('Using WalletConnect...');
+                return await this.connectWithWalletConnect();
+            }
+            
+            async connectWithProvider(provider) {
+                try {
+                    console.log('Connecting with specific provider...');
+                    
+                    const accounts = await provider.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts && accounts.length > 0) {
+                        this.account = accounts[0];
+                        this.web3 = new Web3(provider);
+                        
+                        // Listen for account changes
+                        provider.on('accountsChanged', (accounts) => {
+                            if (accounts.length === 0) {
+                                this.disconnectWallet();
+                            } else {
+                                this.account = accounts[0];
+                                this.updateConnectedUI();
+                            }
+                        });
+                        
+                        console.log('Connected to:', this.account);
+                        this.updateConnectedUI();
+                        this.showMessage('Wallet connected successfully!', 'success');
+                        return true;
+                    }
+                    
+                    return false;
+                } catch (error) {
+                    console.error('Provider connection error:', error);
+                    
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user', 'error');
+                    } else {
+                        this.showMessage('Failed to connect: ' + error.message, 'error');
+                    }
+                    
+                    return false;
+                }
+            }
+            
+            showRainbowInstallPrompt() {
+                this.showMessage('Install Rainbow wallet extension or use the mobile app', 'info');
+                setTimeout(() => {
+                    window.open('https://rainbow.me/', '_blank');
                 }, 1000);
             }
-        });
+            
+            showSimpleConnectionOptions() {
+                this.showWalletSelectionModal();
+            }
+            
+            async connectBrowserWallet() {
+                try {
+                    console.log('Connecting to browser wallet...');
+                    
+                    // Request account access
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts && accounts.length > 0) {
+                        this.account = accounts[0];
+                        console.log('Connected account:', this.account);
+                        this.updateConnectedUI();
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Browser wallet connection error:', error);
+                    if (error.code === 4001) {
+                        this.showMessage('Connection rejected by user');
+                    } else {
+                        this.showMessage('Failed to connect wallet');
+                    }
+                }
+                return false;
+            }
+            
+            updateConnectedUI() {
+                const button = document.getElementById('connectWallet');
+                const statusDiv = document.getElementById('walletStatus');
+                
+                if (button && this.account) {
+                    button.textContent = `${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
+                    button.style.background = '#10b981';
+                    button.style.color = 'white';
+                    
+                    if (statusDiv) {
+                        statusDiv.innerHTML = `
+                            <div class="status-connected">
+                                ✅ Wallet Connected
+                            </div>
+                        `;
+                        statusDiv.style.color = '#10b981';
+                    }
+                    
+                    this.showMessage('Wallet connected successfully!', 'success');
+                }
+            }
+            
+            async showWalletOptions() {
+                // Try to connect to injected providers first
+                if (window.ethereum) {
+                    console.log('Injected provider found, attempting direct connection');
+                    return await this.connectBrowserWallet();
+                }
+                
+                // Show installation instructions if no wallet detected
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Install a Web3 Wallet</h3>
+                        <p style="color: white; margin-bottom: 20px;">To connect your wallet and participate in the presale, please install a Web3 wallet first.</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <a href="https://rainbow.me/" target="_blank" 
+                               style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #ff6b6b; border-radius: 10px; color: white; text-decoration: none;">
+                                🌈 Install Rainbow (Recommended)
+                            </a>
+                            
+                            <a href="https://metamask.io/download/" target="_blank" 
+                               style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f6851b; border-radius: 10px; color: white; text-decoration: none;">
+                                🦊 Install MetaMask
+                            </a>
+                            
+                            <a href="https://trustwallet.com/" target="_blank"
+                               style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #3375bb; border-radius: 10px; color: white; text-decoration: none;">
+                                🛡️ Install Trust Wallet
+                            </a>
+                        </div>
+                        
+                        <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px; margin: 15px 0;">
+                            After installation, return to this page and click "Connect Wallet" again. Your wallet will ask for permission to connect.
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                return false;
+            }
+            
+            showMobileWalletOptions() {
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.8); z-index: 10000;
+                    display: flex; justify-content: center; align-items: center;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #1e293b; padding: 30px; border-radius: 15px; margin: 20px; max-width: 400px; text-align: center;">
+                        <h3 style="color: #2dd4bf; margin-bottom: 20px;">Connect Mobile Wallet</h3>
+                        <p style="color: white; margin-bottom: 20px;">You have a wallet installed! Please use one of these methods to connect:</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                            <button onclick="window.location.href='https://metamask.app.link/dapp/hyperflow-presale-live-shal.vercel.app'" 
+                               style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: #f6851b; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer;">
+                                🦊 Open in MetaMask App
+                            </button>
+                            
+                            <button onclick="window.location.href='https://link.trustwallet.com/open_url?coin_id=60&url=https://hyperflow-presale-live-shal.vercel.app'" 
+                               style="display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: #3375bb; border: none; border-radius: 10px; color: white; font-size: 16px; cursor: pointer;">
+                                🛡️ Open in Trust Wallet
+                            </button>
+                            
+                            <div style="padding: 15px; background: #374151; border-radius: 8px; color: #9ca3af; font-size: 14px;">
+                                Note: This will open the dApp in your wallet's built-in browser where you can safely connect and participate in the presale.
+                            </div>
+                        </div>
+                        
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="margin-top: 15px; padding: 12px 24px; background: #6b7280; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            Cancel
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            }
+            
+            showMessage(message, type = 'info') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
+                
+                notification.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; z-index: 10001;
+                    background: ${bgColor}; color: white; padding: 15px 20px;
+                    border-radius: 8px; font-weight: 500; max-width: 300px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                `;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 5000);
+            }
+        }
         
-        // Initialize
-        console.log('HyperFlow Presale initialized with mobile enhancements');
-        console.log('Platform:', isMobile ? 'Mobile' : 'Desktop');
-        console.log('iOS:', isIOS);
-        console.log('Android:', isAndroid);
-        console.log('WalletConnect Project ID: ca21cf0275758f8258a17ae99f6148d4');
-        console.log('Chain: HyperEVM (999)');
-        console.log('App Config:', APP_CONFIG);
+        // Initialize wallet connection
+        let wallet;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM ready - initializing wallet connection');
+            
+            // Remove any loading screens
+            const loadingBar = document.getElementById('loadingBar');
+            if (loadingBar) {
+                loadingBar.remove();
+            }
+            
+            wallet = new DirectWalletConnect();
+            
+            const button = document.getElementById('connectWallet');
+            if (button) {
+                console.log('Connect button found, adding event listener');
+                button.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    console.log('Connect wallet button clicked');
+                    
+                    if (wallet.account) {
+                        console.log('Already connected:', wallet.account);
+                        return;
+                    }
+                    
+                    // Show wallet selection modal (like Hybra)
+                    wallet.showWalletSelectionModal();
+                    
+                    // Reset button state
+                    button.textContent = originalText;
+                    button.disabled = false;
+                });
+            } else {
+                console.error('Connect button not found!');
+            }
+        });
     </script>
 </body>
 </html>
