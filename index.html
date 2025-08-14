@@ -461,22 +461,48 @@
             }
             
             showWalletSelectionModal() {
-                // Use actual Privy modal instead of custom one
-                if (window.privyReady && privy && privy.login) {
-                    console.log('🎯 LAUNCHING REAL PRIVY MODAL - SAME AS PRIVY.IO/DEMO');
-                    privy.login();
-                } else {
-                    console.log('Privy not ready, checking again...');
-                    setTimeout(() => {
-                        if (window.privyReady && privy && privy.login) {
-                            console.log('🎯 PRIVY NOW READY - LAUNCHING MODAL');
+                // Force Privy modal to show - enhanced logic
+                const launchPrivyModal = () => {
+                    if (window.Privy && privy && typeof privy.login === 'function') {
+                        console.log('🎯 LAUNCHING REAL PRIVY MODAL - SAME AS PRIVY.IO/DEMO');
+                        try {
                             privy.login();
-                        } else {
-                            console.log('Privy still not available, showing fallback modal');
-                            this.showFallbackWalletModal();
+                            return true;
+                        } catch (error) {
+                            console.error('Privy login error:', error);
+                            return false;
                         }
-                    }, 500);
+                    }
+                    return false;
+                };
+
+                // Try immediately first
+                if (launchPrivyModal()) {
+                    return;
                 }
+
+                // If not ready, wait for Privy to initialize
+                console.log('Privy not ready, waiting for initialization...');
+                let attempts = 0;
+                const maxAttempts = 20; // Wait up to 2 seconds
+                
+                const checkPrivy = () => {
+                    attempts++;
+                    
+                    if (launchPrivyModal()) {
+                        console.log('🎯 PRIVY MODAL LAUNCHED SUCCESSFULLY');
+                        return;
+                    }
+                    
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkPrivy, 100);
+                    } else {
+                        console.log('Privy timeout, showing fallback modal');
+                        this.showFallbackWalletModal();
+                    }
+                };
+                
+                setTimeout(checkPrivy, 100);
             }
             
             showFallbackWalletModal() {
