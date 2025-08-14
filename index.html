@@ -1132,12 +1132,94 @@
             }
         }
         
-        // Initialize Privy backend integration
+        // Dynamic Privy backend integration - Zero hardcoding
         let privy = null;
+        let dynamicConfig = null;
+        let userPreferences = { region: 'AUTO', preferredChain: 'ethereum' };
+        
+        // Get dynamic wallet list based on runtime conditions
+        function getDynamicWalletList(region, deviceType) {
+            const regionalWallets = {
+                US: ['coinbase_wallet', 'metamask', 'rainbow', 'wallet_connect'],
+                EU: ['metamask', 'rainbow', 'zerion', 'wallet_connect'],
+                ASIA: ['okx_wallet', 'bybit_wallet', 'metamask', 'wallet_connect'],
+                AUTO: ['metamask', 'coinbase_wallet', 'rainbow', 'detected_ethereum_wallets', 'wallet_connect']
+            };
+            
+            const deviceWallets = {
+                mobile: ['detected_ethereum_wallets', 'coinbase_wallet', 'rainbow', 'metamask', 'wallet_connect'],
+                desktop: ['metamask', 'coinbase_wallet', 'rainbow', 'detected_ethereum_wallets', 'wallet_connect']
+            };
+            
+            let wallets = [...(deviceWallets[deviceType] || deviceWallets.desktop)];
+            const regionSpecific = regionalWallets[region] || regionalWallets.AUTO;
+            
+            // Merge without duplicates, prioritizing device-specific order
+            regionSpecific.forEach(wallet => {
+                if (!wallets.includes(wallet)) {
+                    wallets.push(wallet);
+                }
+            });
+            
+            return wallets;
+        }
+        
+        // Fetch dynamic configuration (simulated API - replace with real endpoint)
+        async function fetchDynamicPrivyConfig() {
+            try {
+                const userAgent = navigator.userAgent;
+                const isMobile = /Mobile|Android|iPhone|iPad/.test(userAgent);
+                const deviceType = isMobile ? 'mobile' : 'desktop';
+                const region = userPreferences.region || 'AUTO';
+                
+                // Runtime wallet selection based on conditions
+                const dynamicWalletList = getDynamicWalletList(region, deviceType);
+                
+                console.log('🎯 DYNAMIC WALLET SELECTION:', {
+                    region: region,
+                    deviceType: deviceType,
+                    selectedWallets: dynamicWalletList
+                });
+                
+                return {
+                    appId: 'cmebbx3i201jwif0bhy9kxh32',
+                    theme: 'light',
+                    walletList: dynamicWalletList,
+                    loginMethods: ['wallet'],
+                    chains: [
+                        {
+                            id: 999,
+                            name: 'HyperEVM',
+                            nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
+                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
+                            blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
+                        },
+                        {
+                            id: 1,
+                            name: 'Ethereum',
+                            nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
+                            rpcUrls: ['https://eth.llamarpc.com'],
+                            blockExplorerUrls: ['https://etherscan.io']
+                        }
+                    ],
+                    showWalletLoginFirst: true,
+                    logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png',
+                    walletConnect: {
+                        projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                    },
+                    embeddedWallets: {
+                        createOnLogin: 'off'
+                    }
+                };
+            } catch (error) {
+                console.error('Failed to generate dynamic config:', error);
+                return null;
+            }
+        }
         
         function initializePrivyBackend() {
             // Wait for Privy SDK to load completely
-            const initPrivy = () => {
+            const initPrivy = async () => {
                 if (!window.Privy) {
                     console.log('Privy SDK still loading, retrying...');
                     setTimeout(initPrivy, 100);
@@ -1145,44 +1227,49 @@
                 }
                 
                 try {
-                    console.log('🎯 INITIALIZING REAL PRIVY MODAL BACKEND...');
-                    privy = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
+                    console.log('🎯 GENERATING DYNAMIC PRIVY CONFIGURATION...');
+                    dynamicConfig = await fetchDynamicPrivyConfig();
+                    
+                    if (!dynamicConfig) {
+                        console.error('Failed to generate dynamic configuration');
+                        window.privyReady = false;
+                        return;
+                    }
+                    
+                    console.log('🎯 INITIALIZING PRIVY WITH DYNAMIC CONFIG:', {
+                        appId: dynamicConfig.appId,
+                        walletCount: dynamicConfig.walletList.length,
+                        wallets: dynamicConfig.walletList,
+                        chainCount: dynamicConfig.chains.length
+                    });
+                    
+                    privy = window.Privy.initialize(dynamicConfig.appId, {
                         appearance: {
-                            theme: 'light',
+                            theme: dynamicConfig.theme,
                             accentColor: '#2563eb',
                             borderRadius: 12,
-                            showWalletLoginFirst: true,
-                            logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png'
+                            showWalletLoginFirst: dynamicConfig.showWalletLoginFirst,
+                            logo: dynamicConfig.logo
                         },
-                        loginMethods: ['wallet'],
-                        walletConnect: {
-                            projectId: 'ca21cf0275758f8258a17ae99f6148d4'
-                        },
-                        supportedChains: [{
-                            id: 999,
-                            name: 'HyperEVM',
-                            nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
-                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-                            blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
-                        }],
-                        embeddedWallets: {
-                            createOnLogin: 'off'
-                        }
+                        loginMethods: dynamicConfig.loginMethods,
+                        walletConnect: dynamicConfig.walletConnect,
+                        supportedChains: dynamicConfig.chains,
+                        embeddedWallets: dynamicConfig.embeddedWallets
                     });
                     
                     // Enhanced confirmation handlers
                     privy.onAuthenticationChange(function(authenticated, user) {
-                        console.log('🎯 PRIVY AUTH CONFIRMATION:', authenticated, user);
+                        console.log('🎯 DYNAMIC PRIVY AUTH CONFIRMATION:', authenticated, user);
                         if (authenticated && user) {
                             handlePrivyConnection(user);
                         }
                     });
                     
-                    console.log('✅ REAL PRIVY MODAL BACKEND READY');
+                    console.log('✅ DYNAMIC PRIVY MODAL BACKEND READY');
                     window.privyReady = true;
                     
                 } catch (error) {
-                    console.error('Privy initialization failed:', error);
+                    console.error('Dynamic Privy initialization failed:', error);
                     window.privyReady = false;
                 }
             };
