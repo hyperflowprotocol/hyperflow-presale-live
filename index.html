@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperFlow Protocol - Presale</title>
+    <!-- Enhanced Privy Integration with Confirmation Triggers -->
+    
+    <link rel="stylesheet" href="presale-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="hyperflow_logo.svg?v=8" alt="HyperFlow Protocol" class="logo-svg">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Main Site</a></li>
+                <li><a href="https://hyperflowprotocol.github.io" target="_blank">Whitepaper</a></li>
+                <li><a href="https://x.com/hflow_protocol?s=21" target="_blank">Twitter</a></li>
+                <li><a href="#presale" class="cta-button">Join Presale</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Banner -->
+    <div style="width: 100%; margin-top: 80px; margin-bottom: 40px;">
+        <img src="hyperflow_hero_banner.svg" alt="HyperFlow Protocol Hero Banner" style="width: 100%; height: auto; display: block;">
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-gradient">HyperFlow Presale</span>
+                    <span class="title-subtitle">Fair Access • Democratic Distribution • No Tiers</span>
+                </h1>
+                <p class="hero-description">
+                    Join the HyperFlow Protocol presale with fixed exchange rate of 25,000 FLOW per HYPE. 
+                    Fair launch design ensures equal access for all HyperEVM ecosystem participants.
+                </p>
+                
+                <div class="presale-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">1B</div>
+                        <div class="stat-label">Total Supply</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">50M</div>
+                        <div class="stat-label">Presale Allocation (5%)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">25,000</div>
+                        <div class="stat-label">FLOW per HYPE</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">2,000</div>
+                        <div class="stat-label">HYPE Hard Cap</div>
+                    </div>
+                </div>
+                
+                <div class="cta-section">
+                    <button class="connect-button" id="connectWallet">
+                        Connect Wallet
+                    </button>
+                    <p class="cta-description">
+                        Secure wallet connection powered by Privy
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Presale Section -->
+    <section id="presale" class="presale-section">
+        <div class="container">
+            <div class="presale-content">
+                <h2 class="section-title">FLOW Token Presale</h2>
+                <p class="section-description">
+                    Purchase FLOW tokens with transparent pricing and instant delivery.
+                </p>
+                
+                <div class="wallet-status" id="walletStatus">
+                    <div class="status-info">
+                        <div class="status-icon">✓</div>
+                        <div class="status-details">
+                            <div class="status-text">Wallet Connected</div>
+                            <div class="wallet-address" id="walletAddress"></div>
+                        </div>
+                    </div>
+                    <button class="disconnect-btn" id="disconnectBtn">Disconnect</button>
+                </div>
+                
+                <div class="purchase-form" id="purchaseForm">
+                    <div class="form-group">
+                        <label for="hypeAmount">HYPE Amount</label>
+                        <div class="input-group">
+                            <input type="number" id="hypeAmount" placeholder="0.0" step="0.001" min="0.001" max="2000">
+                            <span class="input-suffix">HYPE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="conversion-arrow">→</div>
+                    
+                    <div class="form-group">
+                        <label for="flowAmount">FLOW Tokens</label>
+                        <div class="input-group">
+                            <input type="text" id="flowAmount" placeholder="0" readonly>
+                            <span class="input-suffix">FLOW</span>
+                        </div>
+                    </div>
+                    
+                    <button class="purchase-btn" id="purchaseBtn" disabled>
+                        Purchase FLOW
+                    </button>
+                    
+                    <div class="transaction-status" id="transactionStatus"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Privy SDK -->
+    <script src="https://auth.privy.io/js/auth.js"></script>
+    
+    <script>
+        // Enhanced Privy Configuration
+        const APP_ID = 'cmebbx3i201jwif0bhy9kxh32';
+        const WALLETCONNECT_PROJECT_ID = 'ca21cf0275758f8258a17ae99f6148d4';
+        
+        // DOM Elements
+        const connectBtn = document.getElementById('connectWallet');
+        const walletStatus = document.getElementById('walletStatus');
+        const walletAddress = document.getElementById('walletAddress');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const purchaseForm = document.getElementById('purchaseForm');
+        const hypeAmount = document.getElementById('hypeAmount');
+        const flowAmount = document.getElementById('flowAmount');
+        const purchaseBtn = document.getElementById('purchaseBtn');
+        const transactionStatus = document.getElementById('transactionStatus');
+        
+        // Global state
+        let privy = null;
+        let isAuthenticated = false;
+        let currentUser = null;
+        let pendingTransactions = [];
+        
+        // Initialize Privy
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Initializing Enhanced Privy Integration...');
+            
+            try {
+                privy = window.Privy.initialize(APP_ID, {
+                    appearance: {
+                        theme: 'dark',
+                        accentColor: '#2dd4bf',
+                        borderRadius: 12,
+                        logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png',
+                        landingHeader: 'Connect to HyperFlow Protocol',
+                        showWalletLoginFirst: true
+                    },
+                    loginMethods: ['wallet', 'email'],
+                    embeddedWallets: {
+                        createOnLogin: 'users-without-wallets'
+                    },
+                    walletConnect: {
+                        projectId: WALLETCONNECT_PROJECT_ID
+                    },
+                    defaultChain: {
+                        id: 999,
+                        name: 'HyperEVM',
+                        nativeCurrency: {
+                            decimals: 18,
+                            name: 'HYPE',
+                            symbol: 'HYPE'
+                        },
+                        rpcUrls: {
+                            default: ['https://rpc.hyperliquid.xyz/evm']
+                        },
+                        blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
+                    }
+                });
+                
+                console.log('Privy initialized successfully');
+                setupPrivyEventHandlers();
+                setupFormHandlers();
+                
+            } catch (error) {
+                console.error('Failed to initialize Privy:', error);
+                showFallbackConnection();
+            }
+        });
+        
+        // Enhanced Privy Event Handlers with Confirmation Triggers
+        function setupPrivyEventHandlers() {
+            // Connect button
+            connectBtn.onclick = function() {
+                console.log('Initiating Privy login...');
+                if (privy) {
+                    privy.login();
+                } else {
+                    console.error('Privy not initialized');
+                    showFallbackConnection();
+                }
+            };
+            
+            // Disconnect button
+            disconnectBtn.onclick = function() {
+                console.log('Disconnecting wallet...');
+                if (privy) {
+                    privy.logout();
+                }
+            };
+            
+            // Enhanced authentication change handler with confirmation triggers
+            if (privy) {
+                privy.onAuthenticationChange(async function(authenticated, user) {
+                    console.log('Authentication changed:', authenticated, user);
+                    
+                    isAuthenticated = authenticated;
+                    currentUser = user;
+                    
+                    if (authenticated && user) {
+                        await handleWalletConnection(user);
+                    } else {
+                        handleWalletDisconnection();
+                    }
+                });
+                
+                // Enhanced wallet connection handler
+                privy.onWalletConnected && privy.onWalletConnected(async function(wallet) {
+                    console.log('Wallet connected event:', wallet);
+                    await handleWalletConfirmation(wallet);
+                });
+                
+                // Enhanced wallet disconnection handler
+                privy.onWalletDisconnected && privy.onWalletDisconnected(function(wallet) {
+                    console.log('Wallet disconnected event:', wallet);
+                    handleWalletDisconnection();
+                });
+                
+                // Transaction confirmation handler
+                privy.onTransactionConfirmed && privy.onTransactionConfirmed(function(transaction) {
+                    console.log('Transaction confirmed:', transaction);
+                    handleTransactionConfirmation(transaction);
+                });
+                
+                // Enhanced error handler
+                privy.onError && privy.onError(function(error) {
+                    console.error('Privy error:', error);
+                    showMessage('Wallet error: ' + error.message, 'error');
+                });
+            }
+        }
+        
+        // Enhanced wallet connection handler
+        async function handleWalletConnection(user) {
+            console.log('Handling wallet connection for user:', user);
+            
+            try {
+                // Update UI immediately
+                connectBtn.style.display = 'none';
+                walletStatus.style.display = 'flex';
+                purchaseForm.style.display = 'block';
+                
+                // Display wallet address
+                if (user.wallet && user.wallet.address) {
+                    walletAddress.textContent = `${user.wallet.address.substring(0, 6)}...${user.wallet.address.substring(38)}`;
+                    console.log('Wallet address set:', user.wallet.address);
+                } else if (user.linkedAccounts) {
+                    // Check for linked wallet accounts
+                    const walletAccount = user.linkedAccounts.find(account => account.type === 'wallet');
+                    if (walletAccount && walletAccount.address) {
+                        walletAddress.textContent = `${walletAccount.address.substring(0, 6)}...${walletAccount.address.substring(38)}`;
+                        console.log('Linked wallet address set:', walletAccount.address);
+                    }
+                }
+                
+                // Trigger wallet confirmation handlers
+                await handleWalletConfirmation(user.wallet || user.linkedAccounts?.[0]);
+                
+                showMessage('Wallet connected successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error in wallet connection handler:', error);
+                showMessage('Failed to process wallet connection', 'error');
+            }
+        }
+        
+        // Enhanced wallet confirmation handler - KEY FIX for confirmation triggers
+        async function handleWalletConfirmation(wallet) {
+            console.log('Processing wallet confirmation:', wallet);
+            
+            if (!wallet && !isAuthenticated) {
+                console.log('No wallet provided for confirmation');
+                return false;
+            }
+            
+            try {
+                // Verify wallet is connected
+                if (privy && privy.authenticated) {
+                    console.log('✅ WALLET CONFIRMATION VERIFIED - User authenticated');
+                    
+                    // Enable purchase functionality immediately
+                    updatePurchaseButton();
+                    
+                    // Set up real-time confirmation listeners
+                    setupConfirmationListeners();
+                    
+                    // Process any pending transactions
+                    await processPendingTransactions();
+                    
+                    // Trigger chain verification
+                    await verifyChain();
+                    
+                    console.log('✅ Wallet confirmation processing complete');
+                    return true;
+                }
+                
+                console.log('❌ Wallet confirmation failed - user not authenticated');
+                return false;
+                
+            } catch (error) {
+                console.error('Error in wallet confirmation:', error);
+                showMessage('Wallet confirmation failed: ' + error.message, 'error');
+                return false;
+            }
+        }
+        
+        // NEW: Setup real-time confirmation listeners
+        function setupConfirmationListeners() {
+            console.log('Setting up real-time confirmation listeners...');
+            
+            // Listen for any transaction confirmations
+            if (window.ethereum) {
+                window.ethereum.on('message', (message) => {
+                    console.log('Ethereum provider message:', message);
+                    if (message.type === 'eth_subscription' && message.data) {
+                        handleEthereumConfirmation(message.data);
+                    }
+                });
+                
+                // Listen for account changes as confirmations
+                window.ethereum.on('accountsChanged', (accounts) => {
+                    console.log('Account change confirmation:', accounts);
+                    if (accounts.length > 0 && isAuthenticated) {
+                        handleAccountChangeConfirmation(accounts[0]);
+                    }
+                });
+                
+                // Listen for chain change confirmations
+                window.ethereum.on('chainChanged', (chainId) => {
+                    console.log('Chain change confirmation:', chainId);
+                    handleChainChangeConfirmation(chainId);
+                });
+            }
+            
+            // Set up periodic confirmation checks
+            setInterval(async () => {
+                if (isAuthenticated && pendingTransactions.length > 0) {
+                    await checkPendingTransactionConfirmations();
+                }
+            }, 3000); // Check every 3 seconds
+        }
+        
+        // NEW: Handle Ethereum confirmations
+        function handleEthereumConfirmation(data) {
+            console.log('Processing Ethereum confirmation:', data);
+            
+            if (data.result && data.result.transactionHash) {
+                const txHash = data.result.transactionHash;
+                console.log('Transaction confirmation detected:', txHash);
+                
+                // Find and update pending transaction
+                const txIndex = pendingTransactions.findIndex(tx => tx.hash === txHash);
+                if (txIndex !== -1) {
+                    handleTransactionConfirmation({
+                        hash: txHash,
+                        status: 'confirmed'
+                    });
+                }
+            }
+        }
+        
+        // NEW: Handle account change confirmations
+        function handleAccountChangeConfirmation(newAccount) {
+            console.log('Processing account change confirmation:', newAccount);
+            
+            if (currentUser && walletAddress) {
+                walletAddress.textContent = `${newAccount.substring(0, 6)}...${newAccount.substring(38)}`;
+                showMessage('Account updated successfully', 'success');
+            }
+        }
+        
+        // NEW: Handle chain change confirmations
+        function handleChainChangeConfirmation(chainId) {
+            console.log('Processing chain change confirmation:', chainId);
+            
+            const hyperEvmChainId = '0x3e7'; // 999 in hex
+            if (chainId === hyperEvmChainId) {
+                showMessage('Connected to HyperEVM successfully', 'success');
+            } else {
+                showMessage('Please switch to HyperEVM network', 'warning');
+            }
+        }
+        
+        // NEW: Check pending transaction confirmations
+        async function checkPendingTransactionConfirmations() {
+            for (const tx of pendingTransactions) {
+                try {
+                    if (window.ethereum) {
+                        const receipt = await window.ethereum.request({
+                            method: 'eth_getTransactionReceipt',
+                            params: [tx.hash]
+                        });
+                        
+                        if (receipt) {
+                            console.log('Transaction receipt found:', tx.hash, receipt);
+                            handleTransactionConfirmation({
+                                hash: tx.hash,
+                                status: receipt.status === '0x1' ? 'confirmed' : 'failed',
+                                receipt: receipt
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking transaction:', tx.hash, error);
+                }
+            }
+        }
+        
+        // Enhanced transaction confirmation handler
+        function handleTransactionConfirmation(transaction) {
+            console.log('🎉 HANDLING TRANSACTION CONFIRMATION:', transaction);
+            
+            // Remove from pending transactions
+            pendingTransactions = pendingTransactions.filter(tx => tx.hash !== transaction.hash);
+            
+            // Update UI based on status
+            if (transaction.status === 'confirmed') {
+                showMessage(`✅ Transaction confirmed! Hash: ${transaction.hash.substring(0, 10)}...`, 'success');
+                updateTransactionStatus('confirmed', transaction);
+                
+                // Clear form on successful purchase
+                hypeAmount.value = '';
+                flowAmount.value = '';
+                
+            } else if (transaction.status === 'failed') {
+                showMessage('❌ Transaction failed. Please try again.', 'error');
+                updateTransactionStatus('failed', transaction);
+            }
+            
+            // Re-enable purchase button
+            updatePurchaseButton();
+        }
+        
+        // Process pending transactions
+        async function processPendingTransactions() {
+            if (pendingTransactions.length === 0) {
+                console.log('No pending transactions to process');
+                return;
+            }
+            
+            console.log('Processing pending transactions:', pendingTransactions.length);
+            
+            for (const tx of [...pendingTransactions]) { // Create copy to avoid mutation issues
+                try {
+                    await checkPendingTransactionConfirmations();
+                } catch (error) {
+                    console.error('Error processing pending transaction:', tx.hash, error);
+                }
+            }
+        }
+        
+        // Enhanced chain verification
+        async function verifyChain() {
+            try {
+                if (window.ethereum) {
+                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    console.log('Current chain ID:', chainId);
+                    
+                    const hyperEvmChainId = '0x3e7'; // 999 in hex
+                    if (chainId !== hyperEvmChainId) {
+                        console.log('Switching to HyperEVM chain...');
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: hyperEvmChainId }]
+                            });
+                            console.log('Successfully switched to HyperEVM');
+                        } catch (switchError) {
+                            if (switchError.code === 4902) {
+                                // Add HyperEVM network
+                                await window.ethereum.request({
+                                    method: 'wallet_addEthereumChain',
+                                    params: [{
+                                        chainId: hyperEvmChainId,
+                                        chainName: 'HyperEVM',
+                                        nativeCurrency: {
+                                            name: 'HYPE',
+                                            symbol: 'HYPE',
+                                            decimals: 18
+                                        },
+                                        rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
+                                        blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
+                                    }]
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Chain verification error:', error);
+                showMessage('Please switch to HyperEVM network', 'warning');
+            }
+        }
+        
+        // Wallet disconnection handler
+        function handleWalletDisconnection() {
+            console.log('Handling wallet disconnection');
+            
+            isAuthenticated = false;
+            currentUser = null;
+            pendingTransactions = [];
+            
+            // Update UI
+            connectBtn.style.display = 'block';
+            walletStatus.style.display = 'none';
+            purchaseForm.style.display = 'none';
+            
+            // Clear form
+            hypeAmount.value = '';
+            flowAmount.value = '';
+            purchaseBtn.disabled = true;
+            
+            clearTransactionStatus();
+            showMessage('Wallet disconnected', 'info');
+        }
+        
+        // Form handlers
+        function setupFormHandlers() {
+            // Amount calculation with immediate confirmation trigger
+            hypeAmount.addEventListener('input', function() {
+                const hype = parseFloat(this.value) || 0;
+                const flow = hype * 25000;
+                flowAmount.value = flow.toLocaleString();
+                updatePurchaseButton();
+                
+                // Trigger confirmation check if user is authenticated
+                if (isAuthenticated && hype > 0) {
+                    console.log('Input confirmation trigger - amount:', hype);
+                }
+            });
+            
+            // Purchase button with enhanced confirmation
+            purchaseBtn.onclick = async function() {
+                await handlePurchase();
+            };
+        }
+        
+        // Enhanced purchase handler with confirmation triggers
+        async function handlePurchase() {
+            if (!isAuthenticated || !currentUser) {
+                showMessage('Please connect your wallet first', 'error');
+                return;
+            }
+            
+            const hype = parseFloat(hypeAmount.value);
+            if (!hype || hype <= 0) {
+                showMessage('Please enter a valid HYPE amount', 'error');
+                return;
+            }
+            
+            try {
+                purchaseBtn.disabled = true;
+                purchaseBtn.textContent = 'Processing...';
+                showTransactionStatus('pending', 'Processing transaction...');
+                
+                console.log('🚀 INITIATING PURCHASE:', hype, 'HYPE');
+                
+                // Enhanced transaction creation with confirmation triggers
+                if (window.ethereum) {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    
+                    if (accounts.length === 0) {
+                        throw new Error('No accounts connected');
+                    }
+                    
+                    const transaction = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: accounts[0],
+                            to: '0x742d35Cc6634C0532925a3b8D2B9E4F1ABA3cD0f', // Contract address
+                            value: '0x' + (hype * 1e18).toString(16), // Convert HYPE to hex wei
+                            data: '0x', // Simple transfer for demo
+                        }]
+                    });
+                    
+                    console.log('📝 TRANSACTION SENT:', transaction);
+                    
+                    // Add to pending transactions with confirmation tracking
+                    pendingTransactions.push({
+                        hash: transaction,
+                        amount: hype,
+                        timestamp: Date.now(),
+                        confirmations: 0
+                    });
+                    
+                    showTransactionStatus('pending', `Transaction sent: ${transaction.substring(0, 10)}...`);
+                    showMessage('Transaction submitted! Waiting for confirmation...', 'info');
+                    
+                    // Start tracking confirmations immediately
+                    trackTransactionConfirmations(transaction);
+                    
+                } else {
+                    throw new Error('Ethereum provider not available');
+                }
+                
+            } catch (error) {
+                console.error('Purchase error:', error);
+                showMessage('Purchase failed: ' + error.message, 'error');
+                showTransactionStatus('failed', 'Transaction failed');
+                
+            } finally {
+                setTimeout(() => {
+                    updatePurchaseButton();
+                }, 2000);
+            }
+        }
+        
+        // NEW: Track transaction confirmations in real-time
+        function trackTransactionConfirmations(txHash) {
+            console.log('📊 Starting confirmation tracking for:', txHash);
+            
+            const checkConfirmations = async () => {
+                try {
+                    const receipt = await window.ethereum.request({
+                        method: 'eth_getTransactionReceipt',
+                        params: [txHash]
+                    });
+                    
+                    if (receipt) {
+                        console.log('🎯 CONFIRMATION RECEIVED:', receipt);
+                        handleTransactionConfirmation({
+                            hash: txHash,
+                            status: receipt.status === '0x1' ? 'confirmed' : 'failed',
+                            receipt: receipt
+                        });
+                        return true; // Stop checking
+                    }
+                    
+                    console.log('⏳ Still waiting for confirmation...');
+                    return false; // Continue checking
+                    
+                } catch (error) {
+                    console.error('Error checking confirmations:', error);
+                    return false;
+                }
+            };
+            
+            // Check immediately, then every 2 seconds
+            const interval = setInterval(async () => {
+                const confirmed = await checkConfirmations();
+                if (confirmed) {
+                    clearInterval(interval);
+                }
+            }, 2000);
+            
+            // Stop checking after 5 minutes
+            setTimeout(() => {
+                clearInterval(interval);
+            }, 300000);
+        }
+        
+        // UI Helper functions
+        function updatePurchaseButton() {
+            const hype = parseFloat(hypeAmount.value) || 0;
+            const canPurchase = isAuthenticated && hype > 0 && hype <= 2000;
+            
+            purchaseBtn.disabled = !canPurchase;
+            purchaseBtn.textContent = canPurchase ? 'Purchase FLOW' : 
+                                     !isAuthenticated ? 'Connect Wallet' : 'Enter Amount';
+        }
+        
+        function showTransactionStatus(status, message) {
+            transactionStatus.style.display = 'block';
+            transactionStatus.className = `transaction-status ${status}`;
+            transactionStatus.textContent = message;
+        }
+        
+        function updateTransactionStatus(status, transaction) {
+            showTransactionStatus(status, 
+                status === 'confirmed' 
+                    ? `✅ Transaction confirmed: ${transaction.hash.substring(0, 10)}...`
+                    : `❌ Transaction failed: ${transaction.hash.substring(0, 10)}...`
+            );
+        }
+        
+        function clearTransactionStatus() {
+            transactionStatus.style.display = 'none';
+            transactionStatus.textContent = '';
+        }
+        
+        function showMessage(message, type) {
+            console.log(`${type.toUpperCase()}: ${message}`);
+            // Toast notifications could be implemented here
+        }
+        
+        // Fallback connection for when Privy fails
+        function showFallbackConnection() {
+            console.log('Showing fallback connection method');
+            connectBtn.textContent = 'Connect with MetaMask';
+            connectBtn.onclick = async function() {
+                try {
+                    if (typeof window.ethereum !== 'undefined') {
+                        const accounts = await window.ethereum.request({
+                            method: 'eth_requestAccounts'
+                        });
+                        
+                        if (accounts.length > 0) {
+                            // Simulate user object for fallback
+                            await handleWalletConnection({
+                                wallet: { address: accounts[0] }
+                            });
+                        }
+                    } else {
+                        showMessage('Please install MetaMask or use a Web3 wallet', 'error');
+                    }
+                } catch (error) {
+                    console.error('Fallback connection error:', error);
+                    showMessage('Connection failed: ' + error.message, 'error');
+                }
+            };
+        }
+        
+        // Privy SDK fallback loader
+        if (!window.Privy) {
+            console.log('Privy SDK not loaded, waiting...');
+            setTimeout(() => {
+                if (!window.Privy) {
+                    console.error('Privy SDK failed to load');
+                    showFallbackConnection();
+                } else {
+                    document.dispatchEvent(new Event('DOMContentLoaded'));
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
