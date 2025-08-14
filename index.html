@@ -330,6 +330,8 @@
     <!-- Web3 Integration -->
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    <!-- Privy SDK for enhanced wallet support -->
+    <script src="https://auth.privy.io/js/auth.js"></script>
     
     <script>
         console.log('Loading direct Web3 wallet connection...');
@@ -592,11 +594,14 @@
                         
                         // Listen for account changes
                         window.ethereum.on('accountsChanged', (accounts) => {
+                            console.log('🎯 ACCOUNT CHANGE CONFIRMATION:', accounts);
                             if (accounts.length === 0) {
                                 this.disconnectWallet();
                             } else {
                                 this.account = accounts[0];
                                 this.updateConnectedUI();
+                                // Enhanced confirmation trigger
+                                this.handleWalletConfirmation();
                             }
                         });
                         
@@ -1049,6 +1054,17 @@
                 document.body.appendChild(modal);
             }
             
+            handleWalletConfirmation() {
+                console.log('🎯 WALLET CONFIRMATION HANDLER TRIGGERED');
+                // This is the key fix for confirmation triggers
+                if (this.account) {
+                    console.log('✅ Wallet confirmed:', this.account);
+                    this.showMessage('Wallet confirmation verified!', 'success');
+                    return true;
+                }
+                return false;
+            }
+            
             showMessage(message, type = 'info') {
                 const notification = document.createElement('div');
                 const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6';
@@ -1071,6 +1087,62 @@
             }
         }
         
+        // Initialize Privy backend integration
+        let privy = null;
+        
+        function initializePrivyBackend() {
+            if (!window.Privy) {
+                console.log('Privy SDK not loaded, using direct wallet only');
+                return;
+            }
+            
+            try {
+                console.log('Initializing Privy backend support...');
+                privy = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
+                    appearance: {
+                        theme: 'dark',
+                        accentColor: '#2dd4bf',
+                        borderRadius: 12,
+                        showWalletLoginFirst: true
+                    },
+                    loginMethods: ['wallet'],
+                    walletConnect: {
+                        projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                    },
+                    defaultChain: {
+                        id: 999,
+                        name: 'HyperEVM',
+                        nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
+                        rpcUrls: { default: ['https://rpc.hyperliquid.xyz/evm'] }
+                    }
+                });
+                
+                // Enhanced confirmation handlers
+                privy.onAuthenticationChange && privy.onAuthenticationChange(function(authenticated, user) {
+                    console.log('🎯 PRIVY AUTH CONFIRMATION:', authenticated, user);
+                    if (authenticated && user) {
+                        handlePrivyConnection(user);
+                    }
+                });
+                
+                console.log('Privy backend initialized successfully');
+            } catch (error) {
+                console.error('Privy initialization failed:', error);
+            }
+        }
+        
+        function handlePrivyConnection(user) {
+            console.log('🎯 PRIVY CONNECTION CONFIRMATION:', user);
+            if (user.wallet && user.wallet.address) {
+                // Update the main wallet system
+                if (wallet) {
+                    wallet.account = user.wallet.address;
+                    wallet.updateConnectedUI();
+                    wallet.showMessage('Privy wallet connected!', 'success');
+                }
+            }
+        }
+        
         // Initialize wallet connection
         let wallet;
         
@@ -1084,6 +1156,9 @@
             }
             
             wallet = new DirectWalletConnect();
+            
+            // Initialize Privy backend for enhanced wallet support
+            initializePrivyBackend();
             
             const button = document.getElementById('connectWallet');
             if (button) {
