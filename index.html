@@ -466,21 +466,38 @@
                 console.log('🎯 LAUNCHING AUTHENTIC PRIVY MODAL (SAME AS DEMO.PRIVY.IO)');
                 
                 const launchPrivyModal = () => {
-                    if (window.privyReady && privy && privy.login) {
-                        console.log('✅ PRIVY READY - LAUNCHING MODAL');
-                        try {
-                            // This launches the EXACT same modal you saw in the screenshot
-                            privy.login();
-                            return true;
-                        } catch (error) {
-                            console.error('Privy modal launch error:', error);
-                            return false;
+                    console.log('🎯 ATTEMPTING PRIVY MODAL LAUNCH');
+                    console.log('Debug info:', {
+                        privyReady: window.privyReady,
+                        privyExists: !!privy,
+                        privyType: typeof privy,
+                        availableMethods: privy ? Object.keys(privy) : 'none'
+                    });
+                    
+                    if (window.privyReady && privy) {
+                        // Try different login methods
+                        const loginMethods = ['login', 'show', 'open', 'connect'];
+                        
+                        for (const method of loginMethods) {
+                            if (typeof privy[method] === 'function') {
+                                console.log(`✅ LAUNCHING PRIVY MODAL WITH METHOD: ${method}`);
+                                try {
+                                    privy[method]();
+                                    return true;
+                                } catch (error) {
+                                    console.error(`❌ Method ${method} failed:`, error);
+                                    continue;
+                                }
+                            }
                         }
+                        
+                        console.error('❌ No working Privy modal method found');
+                        console.log('Available methods:', Object.keys(privy));
+                        return false;
                     } else {
                         console.log('⏳ Privy not ready yet:', {
                             privyReady: window.privyReady,
-                            privyExists: !!privy,
-                            loginMethod: privy?.login ? 'available' : 'not available'
+                            privyExists: !!privy
                         });
                         return false;
                     }
@@ -1265,20 +1282,25 @@
         }
         
         function initializePrivyBackend() {
-            // Wait for Privy SDK to load completely
+            // Enhanced Privy SDK detection and initialization
             const initPrivy = async () => {
-                if (!window.Privy) {
-                    console.log('Privy SDK still loading, retrying...');
+                // Check for multiple possible Privy objects
+                const privyObject = window.Privy || window.privy || window.PrivySDK;
+                
+                if (!privyObject) {
+                    console.log('⏳ Privy SDK still loading, retrying...');
                     setTimeout(initPrivy, 100);
                     return;
                 }
+                
+                console.log('🎯 PRIVY SDK DETECTED:', Object.keys(privyObject));
                 
                 try {
                     console.log('🎯 GENERATING DYNAMIC PRIVY CONFIGURATION...');
                     dynamicConfig = await fetchDynamicPrivyConfig();
                     
                     if (!dynamicConfig) {
-                        console.error('Failed to generate dynamic configuration');
+                        console.error('❌ Failed to generate dynamic configuration');
                         window.privyReady = false;
                         return;
                     }
@@ -1287,41 +1309,78 @@
                         appId: dynamicConfig.appId,
                         walletCount: dynamicConfig.walletList.length,
                         wallets: dynamicConfig.walletList,
-                        chainCount: dynamicConfig.chains.length
+                        chainCount: dynamicConfig.chains.length,
+                        privyMethods: Object.keys(privyObject)
                     });
                     
-                    privy = window.Privy.initialize(dynamicConfig.appId, {
-                        appearance: {
-                            theme: dynamicConfig.theme,
-                            accentColor: '#2563eb',
-                            borderRadius: 12,
-                            showWalletLoginFirst: dynamicConfig.showWalletLoginFirst,
-                            logo: dynamicConfig.logo
-                        },
-                        loginMethods: dynamicConfig.loginMethods,
-                        walletConnect: dynamicConfig.walletConnect,
-                        supportedChains: dynamicConfig.chains,
-                        embeddedWallets: dynamicConfig.embeddedWallets
-                    });
+                    // Try different initialization methods
+                    if (privyObject.initialize) {
+                        privy = privyObject.initialize(dynamicConfig.appId, {
+                            appearance: {
+                                theme: dynamicConfig.theme,
+                                accentColor: '#2563eb',
+                                borderRadius: 12,
+                                showWalletLoginFirst: dynamicConfig.showWalletLoginFirst,
+                                logo: dynamicConfig.logo
+                            },
+                            loginMethods: dynamicConfig.loginMethods,
+                            walletConnect: dynamicConfig.walletConnect,
+                            supportedChains: dynamicConfig.chains,
+                            embeddedWallets: dynamicConfig.embeddedWallets
+                        });
+                    } else if (privyObject.init) {
+                        privy = privyObject.init(dynamicConfig.appId, {
+                            appearance: {
+                                theme: dynamicConfig.theme,
+                                accentColor: '#2563eb',
+                                borderRadius: 12,
+                                showWalletLoginFirst: dynamicConfig.showWalletLoginFirst,
+                                logo: dynamicConfig.logo
+                            },
+                            loginMethods: dynamicConfig.loginMethods,
+                            walletConnect: dynamicConfig.walletConnect,
+                            supportedChains: dynamicConfig.chains,
+                            embeddedWallets: dynamicConfig.embeddedWallets
+                        });
+                    } else {
+                        console.error('❌ No suitable Privy initialization method found');
+                        console.log('Available methods:', Object.keys(privyObject));
+                        window.privyReady = false;
+                        return;
+                    }
                     
-                    // Enhanced confirmation handlers
-                    privy.onAuthenticationChange(function(authenticated, user) {
-                        console.log('🎯 DYNAMIC PRIVY AUTH CONFIRMATION:', authenticated, user);
-                        if (authenticated && user) {
-                            handlePrivyConnection(user);
-                        }
-                    });
+                    console.log('🎯 PRIVY INSTANCE CREATED:', privy);
+                    console.log('🎯 PRIVY METHODS AVAILABLE:', privy ? Object.keys(privy) : 'none');
+                    
+                    // Enhanced authentication handlers
+                    if (privy && privy.onAuthenticationChange) {
+                        privy.onAuthenticationChange(function(authenticated, user) {
+                            console.log('🎯 DYNAMIC PRIVY AUTH CONFIRMATION:', authenticated, user);
+                            if (authenticated && user) {
+                                handlePrivyConnection(user);
+                            }
+                        });
+                    } else if (privy && privy.onAuthStateChange) {
+                        privy.onAuthStateChange(function(authenticated, user) {
+                            console.log('🎯 DYNAMIC PRIVY AUTH STATE CHANGE:', authenticated, user);
+                            if (authenticated && user) {
+                                handlePrivyConnection(user);
+                            }
+                        });
+                    }
                     
                     console.log('✅ DYNAMIC PRIVY MODAL BACKEND READY');
                     window.privyReady = true;
                     
                 } catch (error) {
-                    console.error('Dynamic Privy initialization failed:', error);
+                    console.error('❌ Dynamic Privy initialization failed:', error);
+                    console.error('Error details:', error.message);
                     window.privyReady = false;
                 }
             };
             
-            initPrivy();
+            // Start initialization with delay to ensure DOM is ready
+            setTimeout(initPrivy, 100);
         }
         
         function handlePrivyConnection(user) {
