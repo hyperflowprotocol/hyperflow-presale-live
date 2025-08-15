@@ -8,10 +8,8 @@
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- React and Privy -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@privy-io/react-auth@1.88.4/dist/index.umd.js"></script>
+    <!-- Privy SDK Direct -->
+    <script src="https://auth.privy.io/js/auth.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -193,64 +191,58 @@
         let isConnected = false;
         let userAccount = null;
 
-        // Initialize Privy React App
+        // Initialize Privy (using working pattern from privy-wallet.html)
         function initializePrivy() {
             try {
-                const { PrivyProvider, usePrivy } = window.PrivyReactAuth;
+                console.log('Initializing Privy with App ID: cmebbx3i201jwif0bhy9kxh32');
                 
-                // Create Privy configuration
-                const privyConfig = {
-                    appId: 'cmebbx3i201jwif0bhy9kxh32',
-                    config: {
-                        loginMethods: ['email', 'wallet', 'google', 'discord'],
-                        appearance: {
-                            theme: 'dark',
-                            accentColor: '#2dd4bf',
-                            logo: 'https://raw.githubusercontent.com/hyperflowprotocol/hyperflow-presale-live/main/hyperflow_logo.svg'
+                if (!window.Privy) {
+                    console.error('❌ Privy SDK not loaded');
+                    return false;
+                }
+
+                // Initialize Privy using the working pattern
+                privyApp = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
+                    appearance: {
+                        theme: 'dark',
+                        accentColor: '#2dd4bf',
+                        borderRadius: 12,
+                        logo: 'https://raw.githubusercontent.com/hyperflowprotocol/hyperflow-presale-live/main/hyperflow_logo.svg',
+                        landingHeader: 'Connect to HyperFlow',
+                        showWalletLoginFirst: false
+                    },
+                    loginMethods: ['wallet', 'email', 'google', 'discord'],
+                    embeddedWallets: {
+                        createOnLogin: 'users-without-wallets'
+                    },
+                    walletConnect: {
+                        projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                    },
+                    defaultChain: {
+                        id: 999,
+                        name: 'HyperEVM',
+                        nativeCurrency: {
+                            decimals: 18,
+                            name: 'HYPE',
+                            symbol: 'HYPE'
                         },
-                        defaultChain: {
-                            id: 999,
-                            name: 'HyperEVM',
-                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-                            nativeCurrency: {
-                                name: 'HYPE',
-                                symbol: 'HYPE',
-                                decimals: 18
-                            }
+                        rpcUrls: {
+                            default: ['https://rpc.hyperliquid.xyz/evm']
                         }
                     }
-                };
+                });
+                
+                console.log('✅ Privy initialized successfully');
+                
+                // Set up authentication change listener
+                privyApp.onAuthenticationChange(function(isAuthenticated, user) {
+                    console.log('Auth change:', isAuthenticated, user);
+                    updateWalletStatus(isAuthenticated ? user : null);
+                });
 
-                // Create React app component
-                const HyperFlowApp = () => {
-                    const { ready, authenticated, user, login, logout } = usePrivy();
-
-                    React.useEffect(() => {
-                        updateWalletStatus(authenticated ? user : null);
-                    }, [ready, authenticated, user]);
-
-                    return null;
-                };
-
-                // Wrapped app with Privy provider
-                const WrappedApp = () => React.createElement(
-                    PrivyProvider,
-                    privyConfig,
-                    React.createElement(HyperFlowApp)
-                );
-
-                // Render the app
-                const container = document.createElement('div');
-                container.id = 'privy-app';
-                container.style.display = 'none';
-                document.body.appendChild(container);
-
-                ReactDOM.render(React.createElement(WrappedApp), container);
-
-                console.log('✅ Privy React App initialized');
                 return true;
             } catch (error) {
-                console.error('❌ Privy initialization failed:', error);
+                console.error('❌ Failed to initialize Privy:', error);
                 return false;
             }
         }
@@ -294,37 +286,16 @@
         // Trigger Privy login modal
         function triggerPrivyLogin() {
             try {
-                // Dispatch custom event to trigger Privy login
-                const privyContainer = document.getElementById('privy-app');
-                if (privyContainer) {
-                    // Find the Privy instance and trigger login
-                    const privyInstance = privyContainer._reactInternalFiber?.child?.stateNode;
-                    if (privyInstance && privyInstance.login) {
-                        privyInstance.login();
-                        return true;
-                    }
-                }
-
-                // Alternative: Try to access Privy through window
-                if (window.PrivyReactAuth && window.PrivyReactAuth.usePrivy) {
-                    // Create a temporary component to trigger login
-                    const TriggerLogin = () => {
-                        const { login } = window.PrivyReactAuth.usePrivy();
-                        React.useEffect(() => {
-                            login();
-                        }, []);
-                        return null;
-                    };
-
-                    const tempContainer = document.createElement('div');
-                    ReactDOM.render(React.createElement(TriggerLogin), tempContainer);
+                if (privyApp && privyApp.login) {
+                    console.log('🚀 Opening Privy login modal...');
+                    privyApp.login();
                     return true;
+                } else {
+                    console.error('❌ Privy app not initialized');
+                    return false;
                 }
-
-                console.log('Attempting to trigger Privy modal...');
-                return false;
             } catch (error) {
-                console.error('Failed to trigger Privy login:', error);
+                console.error('❌ Failed to trigger Privy login:', error);
                 return false;
             }
         }
@@ -334,9 +305,8 @@
             if (isConnected) {
                 // Trigger logout through Privy
                 try {
-                    const { logout } = window.PrivyReactAuth.usePrivy();
-                    if (logout) {
-                        logout();
+                    if (privyApp && privyApp.logout) {
+                        privyApp.logout();
                     } else {
                         updateWalletStatus(null);
                     }
@@ -348,7 +318,6 @@
             }
 
             // Trigger Privy login modal
-            console.log('🚀 Opening Privy login modal...');
             const success = triggerPrivyLogin();
             
             if (!success) {
@@ -388,10 +357,19 @@
                 connectBtn.addEventListener('click', handleWalletConnect);
             }
             
-            // Initialize Privy
-            setTimeout(() => {
+            // Initialize Privy when ready
+            if (window.Privy) {
                 initializePrivy();
-            }, 1000);
+            } else {
+                // Wait for Privy to load
+                setTimeout(() => {
+                    if (window.Privy) {
+                        initializePrivy();
+                    } else {
+                        console.error('❌ Privy SDK failed to load after timeout');
+                    }
+                }, 2000);
+            }
             
             console.log('✅ HyperFlow Presale ready');
         });
