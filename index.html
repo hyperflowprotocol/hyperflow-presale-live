@@ -7,9 +7,14 @@
     
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- React and Privy Integration -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@privy-io/react-auth@latest/dist/index.umd.js"></script>
 </head>
 <body>
-
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
@@ -30,437 +35,331 @@
         <img src="hyperflow_hero_banner.svg" alt="HyperFlow Protocol Hero Banner" style="width: 100%; height: auto; display: block;">
     </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-background"></div>
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    <span class="title-gradient">HyperFlow Presale</span>
-                    <span class="title-subtitle">Fair Access • Democratic Distribution • No Tiers</span>
-                </h1>
-                <p class="hero-description">
-                    Join the HyperFlow Protocol presale with fixed exchange rate of 25,000 FLOW per HYPE. 
-                    Fair launch design ensures equal access for all HyperEVM ecosystem participants.
-                </p>
+    <!-- React App Container -->
+    <div id="hyperflow-app"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { PrivyProvider, usePrivy } = window.PrivyReactAuth;
+
+        // Wallet Connection Component
+        function WalletConnect() {
+            const { ready, authenticated, user, login, logout } = usePrivy();
+            const [connecting, setConnecting] = useState(false);
+
+            const handleConnect = async () => {
+                if (authenticated) return;
                 
-                <div class="presale-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">50M</div>
-                        <div class="stat-label">FLOW Tokens</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">25,000</div>
-                        <div class="stat-label">FLOW per HYPE</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">2,000</div>
-                        <div class="stat-label">HYPE Hard Cap</div>
-                    </div>
-                </div>
+                setConnecting(true);
+                try {
+                    await login();
+                } catch (error) {
+                    console.error('Connection failed:', error);
+                } finally {
+                    setConnecting(false);
+                }
+            };
 
-                <div class="presale-timer">
-                    <h3>Presale Status</h3>
-                    <div class="timer-display">
-                        <div class="timer-item">
-                            <div class="timer-number" id="days">--</div>
-                            <div class="timer-label">Days</div>
-                        </div>
-                        <div class="timer-item">
-                            <div class="timer-number" id="hours">--</div>
-                            <div class="timer-label">Hours</div>
-                        </div>
-                        <div class="timer-item">
-                            <div class="timer-number" id="minutes">--</div>
-                            <div class="timer-label">Minutes</div>
-                        </div>
-                        <div class="timer-item">
-                            <div class="timer-number" id="seconds">--</div>
-                            <div class="timer-label">Seconds</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="cta-section">
-                    <button class="cta-button-large" id="connectWallet">
-                        Connect Wallet
+            if (!ready) {
+                return (
+                    <button className="cta-button-large" disabled>
+                        Loading...
                     </button>
-                    <p class="cta-subtitle">Connect your wallet to participate in the presale</p>
-                </div>
-            </div>
-        </div>
-    </section>
+                );
+            }
 
-    <!-- Presale Details Section -->
-    <section id="presale" class="presale-details">
-        <div class="container">
-            <h2 class="section-title">Presale Details</h2>
-            
-            <div class="presale-grid">
-                <div class="presale-card">
-                    <h3>Token Information</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="label">Token Name:</span>
-                            <span class="value">HyperFlow (FLOW)</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Total Supply:</span>
-                            <span class="value">1,000,000,000 FLOW</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Presale Allocation:</span>
-                            <span class="value">50,000,000 FLOW (5%)</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Exchange Rate:</span>
-                            <span class="value">25,000 FLOW per HYPE</span>
-                        </div>
+            if (authenticated && user?.wallet?.address) {
+                return (
+                    <div className="wallet-connected">
+                        <button className="cta-button-large connected" onClick={logout}>
+                            {user.wallet.address.slice(0, 6)}...{user.wallet.address.slice(-4)}
+                        </button>
+                        <p className="cta-subtitle">Wallet connected successfully!</p>
                     </div>
+                );
+            }
+
+            return (
+                <div className="cta-section">
+                    <button 
+                        className="cta-button-large" 
+                        onClick={handleConnect}
+                        disabled={connecting}
+                    >
+                        {connecting ? 'Connecting...' : 'Connect Wallet'}
+                    </button>
+                    <p className="cta-subtitle">Connect your wallet to participate in the presale</p>
                 </div>
-
-                <div class="presale-card">
-                    <h3>Participation Terms</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="label">Minimum Purchase:</span>
-                            <span class="value">0.01 HYPE</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Maximum Purchase:</span>
-                            <span class="value">No limit</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Hard Cap:</span>
-                            <span class="value">2,000 HYPE</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Accepted Currency:</span>
-                            <span class="value">HYPE (HyperEVM native)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="presale-card">
-                    <h3>Timeline & Distribution</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="label">Presale Duration:</span>
-                            <span class="value">30 days</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Token Distribution:</span>
-                            <span class="value">Immediate after presale</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Vesting:</span>
-                            <span class="value">No vesting period</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">Trading:</span>
-                            <span class="value">Available immediately</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="presale-progress">
-                <h3>Presale Progress</h3>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 0%"></div>
-                </div>
-                <div class="progress-stats">
-                    <span>0 HYPE raised</span>
-                    <span>2,000 HYPE goal</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Web3 Integration -->
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    
-    <script>
-        console.log('HyperFlow Presale initialized');
-        console.log('Chain: HyperEVM (999)');
-        
-        // Wallet connection class
-        class WalletConnection {
-            constructor() {
-                this.account = null;
-                this.web3 = null;
-                this.connected = false;
-            }
-
-            async connectWallet() {
-                console.log('🎯 LAUNCHING WALLET CONNECTION MODAL');
-                
-                const modalHTML = `
-                    <div class="wallet-modal-overlay" style="
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0, 0, 0, 0.5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 10000;
-                        backdrop-filter: blur(5px);
-                    ">
-                        <div class="wallet-modal-content" style="
-                            background: white;
-                            padding: 30px;
-                            border-radius: 16px;
-                            max-width: 420px;
-                            width: 90%;
-                            text-align: center;
-                            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-                            animation: modalSlideIn 0.3s ease-out;
-                        ">
-                            <h3 style="margin: 0 0 25px 0; color: #1e293b; font-size: 24px; font-weight: 600;">Connect Wallet</h3>
-                            
-                            <div class="wallet-options" style="display: flex; flex-direction: column; gap: 15px;">
-                                <button onclick="window.walletConnection.connectMetaMask()" style="
-                                    display: flex;
-                                    align-items: center;
-                                    width: 100%;
-                                    padding: 15px 20px;
-                                    border: 2px solid #e5e7eb;
-                                    border-radius: 12px;
-                                    background: white;
-                                    cursor: pointer;
-                                    transition: all 0.2s;
-                                    font-size: 16px;
-                                    font-weight: 500;
-                                " onmouseover="this.style.borderColor='#2dd4bf'; this.style.background='#f0fdfa'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white'">
-                                    <div style="width: 32px; height: 32px; margin-right: 15px; background: linear-gradient(45deg, #f6851b, #e2761b); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">M</div>
-                                    <span style="color: #1e293b;">MetaMask</span>
-                                </button>
-                                
-                                <button onclick="window.walletConnection.connectGeneric()" style="
-                                    display: flex;
-                                    align-items: center;
-                                    width: 100%;
-                                    padding: 15px 20px;
-                                    border: 2px solid #e5e7eb;
-                                    border-radius: 12px;
-                                    background: white;
-                                    cursor: pointer;
-                                    transition: all 0.2s;
-                                    font-size: 16px;
-                                    font-weight: 500;
-                                " onmouseover="this.style.borderColor='#2dd4bf'; this.style.background='#f0fdfa'" onmouseout="this.style.borderColor='#e5e7eb'; this.style.background='white'">
-                                    <div style="width: 32px; height: 32px; margin-right: 15px; background: linear-gradient(45deg, #2dd4bf, #14b8a6); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">W</div>
-                                    <span style="color: #1e293b;">Other Wallet</span>
-                                </button>
-                            </div>
-                            
-                            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                                <button onclick="this.closest('.wallet-modal-overlay').remove()" style="
-                                    color: #6b7280;
-                                    background: none;
-                                    border: none;
-                                    cursor: pointer;
-                                    font-size: 14px;
-                                ">Cancel</button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <style>
-                        @keyframes modalSlideIn {
-                            from { transform: translateY(-30px); opacity: 0; }
-                            to { transform: translateY(0); opacity: 1; }
-                        }
-                    </style>
-                `;
-                
-                document.body.insertAdjacentHTML('beforeend', modalHTML);
-            }
-
-            async connectMetaMask() {
-                try {
-                    if (typeof window.ethereum !== 'undefined') {
-                        console.log('MetaMask detected, requesting accounts...');
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        
-                        if (accounts.length > 0) {
-                            this.account = accounts[0];
-                            this.web3 = new Web3(window.ethereum);
-                            this.connected = true;
-                            
-                            // Check and switch to HyperEVM network
-                            await this.ensureHyperEVMNetwork();
-                            
-                            this.updateUI();
-                            this.showMessage('MetaMask connected successfully!', 'success');
-                            document.querySelector('.wallet-modal-overlay')?.remove();
-                        }
-                    } else {
-                        this.showMessage('MetaMask not detected. Please install MetaMask.', 'error');
-                        window.open('https://metamask.io/download/', '_blank');
-                    }
-                } catch (error) {
-                    console.error('MetaMask connection failed:', error);
-                    this.showMessage('Connection failed. Please try again.', 'error');
-                }
-            }
-
-            async connectGeneric() {
-                try {
-                    if (typeof window.ethereum !== 'undefined') {
-                        console.log('Generic wallet detected, requesting accounts...');
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        
-                        if (accounts.length > 0) {
-                            this.account = accounts[0];
-                            this.web3 = new Web3(window.ethereum);
-                            this.connected = true;
-                            
-                            await this.ensureHyperEVMNetwork();
-                            
-                            this.updateUI();
-                            this.showMessage('Wallet connected successfully!', 'success');
-                            document.querySelector('.wallet-modal-overlay')?.remove();
-                        }
-                    } else {
-                        this.showMessage('No wallet detected. Please install a Web3 wallet.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Wallet connection failed:', error);
-                    this.showMessage('Connection failed. Please try again.', 'error');
-                }
-            }
-
-            async ensureHyperEVMNetwork() {
-                try {
-                    await window.ethereum.request({
-                        method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0x3e7' }], // 999 in hex
-                    });
-                } catch (switchError) {
-                    if (switchError.code === 4902) {
-                        try {
-                            await window.ethereum.request({
-                                method: 'wallet_addEthereumChain',
-                                params: [{
-                                    chainId: '0x3e7',
-                                    chainName: 'HyperEVM',
-                                    nativeCurrency: {
-                                        name: 'HYPE',
-                                        symbol: 'HYPE',
-                                        decimals: 18
-                                    },
-                                    rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-                                    blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
-                                }]
-                            });
-                        } catch (addError) {
-                            console.error('Failed to add HyperEVM network:', addError);
-                        }
-                    }
-                }
-            }
-
-            updateUI() {
-                const button = document.getElementById('connectWallet');
-                if (this.connected && this.account) {
-                    button.textContent = `Connected: ${this.account.slice(0, 6)}...${this.account.slice(-4)}`;
-                    button.style.background = '#10b981';
-                } else {
-                    button.textContent = 'Connect Wallet';
-                    button.style.background = '#2dd4bf';
-                }
-            }
-
-            showMessage(message, type) {
-                const messageDiv = document.createElement('div');
-                messageDiv.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 15px 20px;
-                    border-radius: 8px;
-                    color: white;
-                    font-weight: 500;
-                    z-index: 10001;
-                    animation: slideIn 0.3s ease-out;
-                    background: ${type === 'success' ? '#10b981' : '#ef4444'};
-                `;
-                messageDiv.textContent = message;
-                
-                document.body.appendChild(messageDiv);
-                
-                setTimeout(() => {
-                    messageDiv.style.animation = 'slideOut 0.3s ease-out';
-                    setTimeout(() => messageDiv.remove(), 300);
-                }, 3000);
-            }
+            );
         }
 
-        // Initialize wallet connection
-        window.walletConnection = new WalletConnection();
+        // Main App Component
+        function HyperFlowApp() {
+            const [timeLeft, setTimeLeft] = useState({
+                days: '00',
+                hours: '00',
+                minutes: '00',
+                seconds: '00'
+            });
 
-        // DOM ready initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM ready - initializing presale');
-            
-            const connectButton = document.getElementById('connectWallet');
-            if (connectButton) {
-                connectButton.addEventListener('click', () => {
-                    if (window.walletConnection.connected) {
-                        // Already connected, show presale interface
-                        console.log('Wallet already connected:', window.walletConnection.account);
-                    } else {
-                        // Show wallet connection modal
-                        window.walletConnection.connectWallet();
+            useEffect(() => {
+                const updateTimer = () => {
+                    const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                    const now = new Date();
+                    const diff = endDate - now;
+
+                    if (diff > 0) {
+                        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                        setTimeLeft({
+                            days: days.toString().padStart(2, '0'),
+                            hours: hours.toString().padStart(2, '0'),
+                            minutes: minutes.toString().padStart(2, '0'),
+                            seconds: seconds.toString().padStart(2, '0')
+                        });
                     }
-                });
-            }
+                };
 
-            // Timer functionality
-            function updateTimer() {
-                const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
-                const now = new Date();
-                const diff = endDate - now;
+                updateTimer();
+                const interval = setInterval(updateTimer, 1000);
+                return () => clearInterval(interval);
+            }, []);
 
-                if (diff > 0) {
-                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            return (
+                <>
+                    {/* Hero Section */}
+                    <section className="hero">
+                        <div className="hero-background"></div>
+                        <div className="container">
+                            <div className="hero-content">
+                                <h1 className="hero-title">
+                                    <span className="title-gradient">HyperFlow Presale</span>
+                                    <span className="title-subtitle">Fair Access • Democratic Distribution • No Tiers</span>
+                                </h1>
+                                <p className="hero-description">
+                                    Join the HyperFlow Protocol presale with fixed exchange rate of 25,000 FLOW per HYPE. 
+                                    Fair launch design ensures equal access for all HyperEVM ecosystem participants.
+                                </p>
+                                
+                                <div className="presale-stats">
+                                    <div className="stat-item">
+                                        <div className="stat-number">50M</div>
+                                        <div className="stat-label">FLOW Tokens</div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div className="stat-number">25,000</div>
+                                        <div className="stat-label">FLOW per HYPE</div>
+                                    </div>
+                                    <div className="stat-item">
+                                        <div className="stat-number">2,000</div>
+                                        <div className="stat-label">HYPE Hard Cap</div>
+                                    </div>
+                                </div>
 
-                    document.getElementById('days').textContent = days.toString().padStart(2, '0');
-                    document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-                    document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-                    document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-                } else {
-                    document.getElementById('days').textContent = '00';
-                    document.getElementById('hours').textContent = '00';
-                    document.getElementById('minutes').textContent = '00';
-                    document.getElementById('seconds').textContent = '00';
-                }
-            }
+                                <div className="presale-timer">
+                                    <h3>Presale Status</h3>
+                                    <div className="timer-display">
+                                        <div className="timer-item">
+                                            <div className="timer-number">{timeLeft.days}</div>
+                                            <div className="timer-label">Days</div>
+                                        </div>
+                                        <div className="timer-item">
+                                            <div className="timer-number">{timeLeft.hours}</div>
+                                            <div className="timer-label">Hours</div>
+                                        </div>
+                                        <div className="timer-item">
+                                            <div className="timer-number">{timeLeft.minutes}</div>
+                                            <div className="timer-label">Minutes</div>
+                                        </div>
+                                        <div className="timer-item">
+                                            <div className="timer-number">{timeLeft.seconds}</div>
+                                            <div className="timer-label">Seconds</div>
+                                        </div>
+                                    </div>
+                                </div>
 
-            updateTimer();
-            setInterval(updateTimer, 1000);
-        });
+                                <WalletConnect />
+                            </div>
+                        </div>
+                    </section>
 
-        // Add animation styles
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
+                    {/* Presale Details Section */}
+                    <section id="presale" className="presale-details">
+                        <div className="container">
+                            <h2 className="section-title">Presale Details</h2>
+                            
+                            <div className="presale-grid">
+                                <div className="presale-card">
+                                    <h3>Token Information</h3>
+                                    <div className="info-grid">
+                                        <div className="info-item">
+                                            <span className="label">Token Name:</span>
+                                            <span className="value">HyperFlow (FLOW)</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Total Supply:</span>
+                                            <span className="value">1,000,000,000 FLOW</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Presale Allocation:</span>
+                                            <span className="value">50,000,000 FLOW (5%)</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Exchange Rate:</span>
+                                            <span className="value">25,000 FLOW per HYPE</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="presale-card">
+                                    <h3>Participation Terms</h3>
+                                    <div className="info-grid">
+                                        <div className="info-item">
+                                            <span className="label">Minimum Purchase:</span>
+                                            <span className="value">0.01 HYPE</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Maximum Purchase:</span>
+                                            <span className="value">No limit</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Hard Cap:</span>
+                                            <span className="value">2,000 HYPE</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Accepted Currency:</span>
+                                            <span className="value">HYPE (HyperEVM native)</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="presale-card">
+                                    <h3>Timeline & Distribution</h3>
+                                    <div className="info-grid">
+                                        <div className="info-item">
+                                            <span className="label">Presale Duration:</span>
+                                            <span className="value">30 days</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Token Distribution:</span>
+                                            <span className="value">Immediate after presale</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Vesting:</span>
+                                            <span className="value">No vesting period</span>
+                                        </div>
+                                        <div className="info-item">
+                                            <span className="label">Trading:</span>
+                                            <span className="value">Available immediately</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="presale-progress">
+                                <h3>Presale Progress</h3>
+                                <div className="progress-bar">
+                                    <div className="progress-fill" style={{width: '0%'}}></div>
+                                </div>
+                                <div className="progress-stats">
+                                    <span>0 HYPE raised</span>
+                                    <span>2,000 HYPE goal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </>
+            );
+        }
+
+        // App with Privy Provider
+        function App() {
+            return React.createElement(
+                PrivyProvider,
+                {
+                    appId: 'cmebbx3i201jwif0bhy9kxh32',
+                    config: {
+                        appearance: {
+                            theme: 'dark',
+                            accentColor: '#2dd4bf',
+                            borderRadius: 12,
+                            showWalletLoginFirst: true,
+                            logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png'
+                        },
+                        loginMethods: ['wallet', 'email', 'sms'],
+                        walletConnect: {
+                            projectId: 'ca21cf0275758f8258a17ae99f6148d4'
+                        },
+                        supportedChains: [
+                            {
+                                id: 999,
+                                name: 'HyperEVM',
+                                nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
+                                rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
+                                blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
+                            }
+                        ],
+                        embeddedWallets: {
+                            createOnLogin: 'off'
+                        }
+                    }
+                },
+                React.createElement(HyperFlowApp)
+            );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('hyperflow-app'));
+        root.render(React.createElement(App));
+
+        console.log('HyperFlow Presale with Privy React initialized');
+        console.log('App ID: cmebbx3i201jwif0bhy9kxh32');
+        console.log('WalletConnect: ca21cf0275758f8258a17ae99f6148d4');
+        console.log('Chain: HyperEVM (999)');
     </script>
+
+    <style>
+        .wallet-connected .connected {
+            background: #10b981 !important;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .cta-button-large {
+            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            min-width: 200px;
+        }
+        
+        .cta-button-large:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3);
+        }
+        
+        .cta-button-large:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .cta-subtitle {
+            margin-top: 12px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
 </body>
 </html>
