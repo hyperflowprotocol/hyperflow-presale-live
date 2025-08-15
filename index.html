@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Privy SDK -->
-    <script src="https://auth.privy.io/js/v2.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@privy-io/js-sdk-core@0.53.3/dist/index.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -195,26 +195,8 @@
         async function initializePrivy() {
             try {
                 if (window.Privy) {
-                    privyClient = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
-                        appearance: {
-                            theme: 'dark',
-                            accentColor: '#2dd4bf',
-                            borderRadius: 12,
-                            showWalletLoginFirst: true
-                        },
-                        loginMethods: ['wallet', 'email'],
-                        walletConnect: {
-                            projectId: 'ca21cf0275758f8258a17ae99f6148d4'
-                        },
-                        supportedChains: [
-                            {
-                                id: 999,
-                                name: 'HyperEVM',
-                                nativeCurrency: { decimals: 18, name: 'HYPE', symbol: 'HYPE' },
-                                rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-                                blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
-                            }
-                        ]
+                    privyClient = new window.Privy({
+                        appId: 'cmebbx3i201jwif0bhy9kxh32'
                     });
 
                     console.log('✅ Privy initialized successfully');
