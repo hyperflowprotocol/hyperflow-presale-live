@@ -4,220 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HyperFlow Protocol - Presale</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
             color: white;
-            line-height: 1.6;
             min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 2rem;
         }
-
-        .header {
+        
+        .container {
+            max-width: 800px;
             text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem 0;
         }
-
+        
         .logo {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 800;
             background: linear-gradient(135deg, #2dd4bf, #14b8a6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: #94a3b8;
             margin-bottom: 2rem;
         }
-
-        .presale-stats {
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2dd4bf;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+        }
+        
+        .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 2rem;
             margin: 3rem 0;
         }
-
+        
         .stat-card {
             background: rgba(45, 212, 191, 0.1);
             border: 1px solid #2dd4bf;
             border-radius: 12px;
             padding: 2rem;
-            text-align: center;
         }
-
+        
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
             color: #2dd4bf;
             margin-bottom: 0.5rem;
         }
-
+        
         .stat-label {
             color: #94a3b8;
             font-size: 1rem;
         }
-
-        .presale-timer {
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 16px;
-            padding: 2rem;
-            margin: 3rem 0;
-            text-align: center;
-        }
-
-        .timer-title {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #2dd4bf;
-        }
-
-        .timer-display {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .timer-item {
-            text-align: center;
-        }
-
-        .timer-number {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #2dd4bf;
-            display: block;
-        }
-
-        .timer-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .wallet-section {
-            text-align: center;
-            margin: 3rem 0;
-        }
-
-        .connect-btn {
+        
+        .connect-button {
             background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+            color: #0f172a;
             border: none;
             padding: 1rem 2rem;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
             font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 200px;
+            margin-top: 2rem;
+            transition: transform 0.2s;
         }
-
-        .connect-btn:hover {
+        
+        .connect-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(45, 212, 191, 0.3);
         }
-
-        .wallet-status {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: rgba(16, 185, 129, 0.1);
+        
+        .status {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
             border-radius: 8px;
-            display: none;
-        }
-
-        .connected-address {
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .details-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-
-        .details-card {
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 16px;
-            padding: 2rem;
-        }
-
-        .details-card h3 {
-            color: #2dd4bf;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            padding-bottom: 0.8rem;
-            border-bottom: 1px solid rgba(45, 212, 191, 0.2);
-        }
-
-        .info-label {
-            color: #94a3b8;
-        }
-
-        .info-value {
-            color: white;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            .timer-display {
-                gap: 1rem;
-            }
-            .timer-number {
-                font-size: 2rem;
-            }
-            .container {
-                padding: 1rem;
-            }
+            padding: 1rem;
+            margin-top: 2rem;
+            color: #22c55e;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <div class="logo">HyperFlow Protocol</div>
-            <h1 class="hero-title">HyperFlow Presale</h1>
-            <p class="hero-subtitle">Fair Access • Democratic Distribution • No Tiers</p>
-        </header>
-
-        <div class="presale-stats">
+        <div class="logo">HyperFlow Protocol</div>
+        <h1 class="title">Presale Live</h1>
+        <p class="subtitle">Fair Access • Democratic Distribution • No Tiers</p>
+        
+        <div class="stats">
             <div class="stat-card">
                 <div class="stat-number">50M</div>
                 <div class="stat-label">FLOW Tokens</div>
@@ -231,207 +123,31 @@
                 <div class="stat-label">HYPE Hard Cap</div>
             </div>
         </div>
-
-        <div class="presale-timer">
-            <h3 class="timer-title">Presale Live</h3>
-            <div class="timer-display">
-                <div class="timer-item">
-                    <div class="timer-number" id="days">30</div>
-                    <div class="timer-label">Days</div>
-                </div>
-                <div class="timer-item">
-                    <div class="timer-number" id="hours">00</div>
-                    <div class="timer-label">Hours</div>
-                </div>
-                <div class="timer-item">
-                    <div class="timer-number" id="minutes">00</div>
-                    <div class="timer-label">Minutes</div>
-                </div>
-                <div class="timer-item">
-                    <div class="timer-number" id="seconds">00</div>
-                    <div class="timer-label">Seconds</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="wallet-section">
-            <button class="connect-btn" id="connectWallet">Connect Wallet</button>
-            <div class="wallet-status" id="walletStatus">
-                <div class="connected-address" id="connectedAddress"></div>
-            </div>
-        </div>
-
-        <div class="details-section">
-            <div class="details-card">
-                <h3>Token Information</h3>
-                <div class="info-item">
-                    <span class="info-label">Token Name:</span>
-                    <span class="info-value">HyperFlow (FLOW)</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Total Supply:</span>
-                    <span class="info-value">1,000,000,000 FLOW</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Presale Allocation:</span>
-                    <span class="info-value">50,000,000 FLOW (5%)</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Exchange Rate:</span>
-                    <span class="info-value">25,000 FLOW per HYPE</span>
-                </div>
-            </div>
-
-            <div class="details-card">
-                <h3>Presale Details</h3>
-                <div class="info-item">
-                    <span class="info-label">Blockchain:</span>
-                    <span class="info-value">HyperEVM (Chain 999)</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Hard Cap:</span>
-                    <span class="info-value">2,000 HYPE</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Min Purchase:</span>
-                    <span class="info-value">0.1 HYPE</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Max Purchase:</span>
-                    <span class="info-value">50 HYPE</span>
-                </div>
-            </div>
+        
+        <button class="connect-button" onclick="connectWallet()">
+            Connect Wallet
+        </button>
+        
+        <div class="status">
+            ✅ HyperFlow Presale Platform Active
         </div>
     </div>
-
+    
     <script>
-        let isConnected = false;
-        let userAccount = null;
-
-        // HyperEVM Chain Configuration
-        const HYPEREVM_CHAIN = {
-            chainId: '0x3E7', // 999 in hex
-            chainName: 'HyperEVM',
-            nativeCurrency: {
-                name: 'HYPE',
-                symbol: 'HYPE',
-                decimals: 18
-            },
-            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
-            blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
-        };
-
-        // Update wallet connection status
-        function updateWalletStatus(connected, account = null) {
-            const connectBtn = document.getElementById('connectWallet');
-            const walletStatus = document.getElementById('walletStatus');
-            const connectedAddress = document.getElementById('connectedAddress');
-
-            if (connected && account) {
-                isConnected = true;
-                userAccount = account;
-                connectBtn.textContent = `${account.slice(0, 6)}...${account.slice(-4)}`;
-                connectBtn.style.background = '#10b981';
-                connectedAddress.textContent = `Connected: ${account}`;
-                walletStatus.style.display = 'block';
-            } else {
-                isConnected = false;
-                userAccount = null;
-                connectBtn.textContent = 'Connect Wallet';
-                connectBtn.style.background = 'linear-gradient(135deg, #2dd4bf, #14b8a6)';
-                walletStatus.style.display = 'none';
-            }
-        }
-
-        // Add HyperEVM network to wallet
-        async function addHyperEVMNetwork() {
-            try {
-                await window.ethereum.request({
-                    method: 'wallet_addEthereumChain',
-                    params: [HYPEREVM_CHAIN]
-                });
-                return true;
-            } catch (error) {
-                console.error('Failed to add HyperEVM network:', error);
-                return false;
-            }
-        }
-
-        // Connect wallet function
-        async function connectWallet() {
-            if (isConnected) {
-                updateWalletStatus(false);
-                return;
-            }
-
-            try {
-                if (typeof window.ethereum !== 'undefined') {
-                    const accounts = await window.ethereum.request({ 
-                        method: 'eth_requestAccounts' 
-                    });
-                    
-                    if (accounts.length > 0) {
-                        await addHyperEVMNetwork();
-                        updateWalletStatus(true, accounts[0]);
-                    }
-                } else {
-                    alert('Please install MetaMask or use a Web3 browser to connect your wallet.');
-                    window.open('https://metamask.io/download/', '_blank');
-                }
-            } catch (error) {
-                console.error('Wallet connection failed:', error);
-                alert('Failed to connect wallet. Please try again.');
-            }
-        }
-
-        // Timer functionality
-        function updateTimer() {
-            const endDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-            const now = new Date();
-            const diff = endDate - now;
-
-            if (diff > 0) {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                document.getElementById('days').textContent = days.toString().padStart(2, '0');
-                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-            }
-        }
-
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', () => {
-            updateTimer();
-            setInterval(updateTimer, 1000);
-            
-            // Setup wallet connection
-            const connectBtn = document.getElementById('connectWallet');
-            connectBtn.addEventListener('click', connectWallet);
-            
-            // Check if wallet is already connected
+        function connectWallet() {
             if (typeof window.ethereum !== 'undefined') {
-                window.ethereum.request({ method: 'eth_accounts' })
+                window.ethereum.request({ method: 'eth_requestAccounts' })
                     .then(accounts => {
-                        if (accounts.length > 0) {
-                            updateWalletStatus(true, accounts[0]);
-                        }
+                        alert('Wallet connected: ' + accounts[0].substring(0, 6) + '...');
+                    })
+                    .catch(error => {
+                        alert('Please install MetaMask or another Web3 wallet');
                     });
-
-                // Listen for account changes
-                window.ethereum.on('accountsChanged', function(accounts) {
-                    if (accounts.length > 0) {
-                        updateWalletStatus(true, accounts[0]);
-                    } else {
-                        updateWalletStatus(false);
-                    }
-                });
+            } else {
+                alert('Please install MetaMask or another Web3 wallet');
             }
-        });
-
+        }
+        
         console.log('HyperFlow Presale initialized successfully');
     </script>
 </body>

@@ -1,0 +1,2 @@
+Force rebuild timestamp: 1755238853797
+This file forces Vercel to rebuild completely.
