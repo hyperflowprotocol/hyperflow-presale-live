@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- WalletConnect -->
-    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
+    <!-- React and Privy -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@privy-io/react-auth@1.88.4/dist/index.umd.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -185,27 +186,96 @@
 
     <script>
         console.log('HyperFlow Presale initialized');
-        console.log('WalletConnect Project ID: ca21cf0275758f8258a17ae99f6148d4');
+        console.log('Privy App ID: cmebbx3i201jwif0bhy9kxh32');
         console.log('Chain: HyperEVM (999)');
 
-        let web3 = null;
-        let provider = null;
+        let privyApp = null;
         let isConnected = false;
         let userAccount = null;
 
+        // Initialize Privy React App
+        function initializePrivy() {
+            try {
+                const { PrivyProvider, usePrivy } = window.PrivyReactAuth;
+                
+                // Create Privy configuration
+                const privyConfig = {
+                    appId: 'cmebbx3i201jwif0bhy9kxh32',
+                    config: {
+                        loginMethods: ['email', 'wallet', 'google', 'discord'],
+                        appearance: {
+                            theme: 'dark',
+                            accentColor: '#2dd4bf',
+                            logo: 'https://raw.githubusercontent.com/hyperflowprotocol/hyperflow-presale-live/main/hyperflow_logo.svg'
+                        },
+                        defaultChain: {
+                            id: 999,
+                            name: 'HyperEVM',
+                            rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
+                            nativeCurrency: {
+                                name: 'HYPE',
+                                symbol: 'HYPE',
+                                decimals: 18
+                            }
+                        }
+                    }
+                };
+
+                // Create React app component
+                const HyperFlowApp = () => {
+                    const { ready, authenticated, user, login, logout } = usePrivy();
+
+                    React.useEffect(() => {
+                        updateWalletStatus(authenticated ? user : null);
+                    }, [ready, authenticated, user]);
+
+                    return null;
+                };
+
+                // Wrapped app with Privy provider
+                const WrappedApp = () => React.createElement(
+                    PrivyProvider,
+                    privyConfig,
+                    React.createElement(HyperFlowApp)
+                );
+
+                // Render the app
+                const container = document.createElement('div');
+                container.id = 'privy-app';
+                container.style.display = 'none';
+                document.body.appendChild(container);
+
+                ReactDOM.render(React.createElement(WrappedApp), container);
+
+                console.log('✅ Privy React App initialized');
+                return true;
+            } catch (error) {
+                console.error('❌ Privy initialization failed:', error);
+                return false;
+            }
+        }
+
         // Update wallet connection status
-        function updateWalletStatus(account) {
+        function updateWalletStatus(user) {
             const connectBtn = document.getElementById('connect-wallet');
             const walletStatus = document.getElementById('wallet-status');
             const connectedAddress = document.getElementById('connected-address');
 
-            if (account) {
+            if (user && (user.wallet || user.email)) {
                 isConnected = true;
-                userAccount = account;
-                connectBtn.textContent = `${account.slice(0, 6)}...${account.slice(-4)}`;
+                userAccount = user.wallet?.address || user.email?.address || 'Connected';
+                
+                if (user.wallet) {
+                    connectBtn.textContent = `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`;
+                } else if (user.email) {
+                    connectBtn.textContent = user.email.address.slice(0, 10) + '...';
+                } else {
+                    connectBtn.textContent = 'Connected';
+                }
+                
                 connectBtn.style.background = '#10b981';
                 if (connectedAddress) {
-                    connectedAddress.textContent = `Connected: ${account}`;
+                    connectedAddress.textContent = `Connected: ${userAccount}`;
                 }
                 if (walletStatus) {
                     walletStatus.style.display = 'block';
@@ -221,57 +291,40 @@
             }
         }
 
-        // MetaMask connection
-        async function connectMetaMask() {
+        // Trigger Privy login modal
+        function triggerPrivyLogin() {
             try {
-                if (typeof window.ethereum !== 'undefined') {
-                    const accounts = await window.ethereum.request({ 
-                        method: 'eth_requestAccounts' 
-                    });
-                    
-                    if (accounts.length > 0) {
-                        web3 = new Web3(window.ethereum);
-                        updateWalletStatus(accounts[0]);
-                        console.log('✅ MetaMask connected:', accounts[0]);
+                // Dispatch custom event to trigger Privy login
+                const privyContainer = document.getElementById('privy-app');
+                if (privyContainer) {
+                    // Find the Privy instance and trigger login
+                    const privyInstance = privyContainer._reactInternalFiber?.child?.stateNode;
+                    if (privyInstance && privyInstance.login) {
+                        privyInstance.login();
                         return true;
                     }
-                } else {
-                    alert('Please install MetaMask or use a Web3 browser');
                 }
-                return false;
-            } catch (error) {
-                console.error('MetaMask connection failed:', error);
-                alert('Failed to connect wallet. Please try again.');
-                return false;
-            }
-        }
 
-        // WalletConnect connection
-        async function connectWalletConnect() {
-            try {
-                provider = new WalletConnectProvider.default({
-                    infuraId: "9aa3d95b3bc440fa88ea12eaa4456161",
-                    rpc: {
-                        999: "https://rpc.hyperliquid.xyz/evm"
-                    },
-                    chainId: 999,
-                    qrcode: true,
-                    qrcodeModalOptions: {
-                        mobileLinks: ["rainbow", "metamask", "argent", "trust", "imtoken", "pillar"]
-                    }
-                });
+                // Alternative: Try to access Privy through window
+                if (window.PrivyReactAuth && window.PrivyReactAuth.usePrivy) {
+                    // Create a temporary component to trigger login
+                    const TriggerLogin = () => {
+                        const { login } = window.PrivyReactAuth.usePrivy();
+                        React.useEffect(() => {
+                            login();
+                        }, []);
+                        return null;
+                    };
 
-                await provider.enable();
-                web3 = new Web3(provider);
-                
-                const accounts = await web3.eth.getAccounts();
-                if (accounts.length > 0) {
-                    updateWalletStatus(accounts[0]);
-                    console.log('✅ WalletConnect connected:', accounts[0]);
+                    const tempContainer = document.createElement('div');
+                    ReactDOM.render(React.createElement(TriggerLogin), tempContainer);
                     return true;
                 }
+
+                console.log('Attempting to trigger Privy modal...');
+                return false;
             } catch (error) {
-                console.error('WalletConnect failed:', error);
+                console.error('Failed to trigger Privy login:', error);
                 return false;
             }
         }
@@ -279,105 +332,28 @@
         // Handle wallet connection
         async function handleWalletConnect() {
             if (isConnected) {
-                // Disconnect
-                if (provider && provider.disconnect) {
-                    await provider.disconnect();
+                // Trigger logout through Privy
+                try {
+                    const { logout } = window.PrivyReactAuth.usePrivy();
+                    if (logout) {
+                        logout();
+                    } else {
+                        updateWalletStatus(null);
+                    }
+                } catch (error) {
+                    console.error('Logout failed:', error);
+                    updateWalletStatus(null);
                 }
-                updateWalletStatus(null);
-                web3 = null;
-                provider = null;
                 return;
             }
 
-            // Show wallet selection modal
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 10000;
-            `;
+            // Trigger Privy login modal
+            console.log('🚀 Opening Privy login modal...');
+            const success = triggerPrivyLogin();
             
-            modal.innerHTML = `
-                <div style="
-                    background: #1e293b;
-                    border-radius: 12px;
-                    padding: 24px;
-                    max-width: 400px;
-                    width: 90%;
-                    color: white;
-                    border: 1px solid #334155;
-                ">
-                    <h3 style="margin: 0 0 20px 0; color: #2dd4bf; text-align: center;">Connect Wallet</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <button onclick="selectWallet('metamask')" style="
-                            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
-                            border: none;
-                            padding: 16px;
-                            border-radius: 8px;
-                            color: white;
-                            font-weight: 600;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            gap: 12px;
-                        ">
-                            <span>🦊</span> MetaMask
-                        </button>
-                        <button onclick="selectWallet('walletconnect')" style="
-                            background: #3b82f6;
-                            border: none;
-                            padding: 16px;
-                            border-radius: 8px;
-                            color: white;
-                            font-weight: 600;
-                            cursor: pointer;
-                            display: flex;
-                            align-items: center;
-                            gap: 12px;
-                        ">
-                            <span>📱</span> WalletConnect
-                        </button>
-                        <button onclick="closeModal()" style="
-                            background: #64748b;
-                            border: none;
-                            padding: 16px;
-                            border-radius: 8px;
-                            color: white;
-                            font-weight: 600;
-                            cursor: pointer;
-                        ">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(modal);
-            window.currentModal = modal;
-        }
-
-        // Wallet selection functions
-        async function selectWallet(type) {
-            closeModal();
-            
-            if (type === 'metamask') {
-                await connectMetaMask();
-            } else if (type === 'walletconnect') {
-                await connectWalletConnect();
-            }
-        }
-
-        function closeModal() {
-            if (window.currentModal) {
-                document.body.removeChild(window.currentModal);
-                window.currentModal = null;
+            if (!success) {
+                console.log('⚠️ Privy modal failed to open, check console for details');
+                alert('Authentication system is loading. Please try again in a moment.');
             }
         }
 
@@ -411,6 +387,11 @@
             if (connectBtn) {
                 connectBtn.addEventListener('click', handleWalletConnect);
             }
+            
+            // Initialize Privy
+            setTimeout(() => {
+                initializePrivy();
+            }, 1000);
             
             console.log('✅ HyperFlow Presale ready');
         });
