@@ -8,11 +8,8 @@
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Privy SDK for React -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/@privy-io/react-auth@1.88.4/dist/index.umd.js"></script>
+    <!-- Privy SDK -->
+    <script src="https://auth.privy.io/js/v2.0.0"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -185,84 +182,27 @@
         </div>
     </section>
 
-    <div id="privy-root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { PrivyProvider, usePrivy } = window.PrivyReactAuth;
-
+    <script>
         console.log('HyperFlow Presale initialized');
         console.log('App ID: cmebbx3i201jwif0bhy9kxh32');
         console.log('WalletConnect: ca21cf0275758f8258a17ae99f6148d4');
         console.log('Chain: HyperEVM (999)');
 
-        // Privy Wallet Component
-        function PrivyWalletConnect() {
-            const { ready, authenticated, user, login, logout } = usePrivy();
-            const [connecting, setConnecting] = useState(false);
+        let privyClient = null;
+        let isConnected = false;
 
-            const handleConnect = async () => {
-                if (authenticated) {
-                    await logout();
-                    return;
-                }
-                
-                setConnecting(true);
-                try {
-                    await login();
-                } catch (error) {
-                    console.error('Connection failed:', error);
-                } finally {
-                    setConnecting(false);
-                }
-            };
-
-            useEffect(() => {
-                const connectBtn = document.getElementById('connect-wallet');
-                const walletStatus = document.getElementById('wallet-status');
-                const connectedAddress = document.getElementById('connected-address');
-
-                if (connectBtn) {
-                    if (authenticated && user?.wallet?.address) {
-                        connectBtn.textContent = `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`;
-                        connectBtn.style.background = '#10b981';
-                        if (connectedAddress) {
-                            connectedAddress.textContent = `Connected: ${user.wallet.address}`;
-                        }
-                        if (walletStatus) {
-                            walletStatus.style.display = 'block';
-                        }
-                    } else {
-                        connectBtn.textContent = connecting ? 'Connecting...' : 'Connect Wallet';
-                        connectBtn.style.background = 'linear-gradient(135deg, #2dd4bf, #14b8a6)';
-                        if (walletStatus) {
-                            walletStatus.style.display = 'none';
-                        }
-                    }
-
-                    connectBtn.onclick = handleConnect;
-                    connectBtn.disabled = !ready || connecting;
-                }
-            }, [ready, authenticated, user, connecting]);
-
-            return null; // This component just manages the existing button
-        }
-
-        // Privy App
-        function PrivyApp() {
-            return React.createElement(
-                PrivyProvider,
-                {
-                    appId: 'cmebbx3i201jwif0bhy9kxh32',
-                    config: {
+        // Initialize Privy
+        async function initializePrivy() {
+            try {
+                if (window.Privy) {
+                    privyClient = window.Privy.initialize('cmebbx3i201jwif0bhy9kxh32', {
                         appearance: {
                             theme: 'dark',
                             accentColor: '#2dd4bf',
                             borderRadius: 12,
-                            showWalletLoginFirst: true,
-                            logo: 'https://replit.com/cdn-cgi/image/width=64,height=64,fit=cover,gravity=0.5x0.5,format=auto/https://storage.googleapis.com/replit/images/1755112079893_62dfdc6f8f23b4cb20fca19f7862c56a.png'
+                            showWalletLoginFirst: true
                         },
-                        loginMethods: ['wallet', 'email', 'sms'],
+                        loginMethods: ['wallet', 'email'],
                         walletConnect: {
                             projectId: 'ca21cf0275758f8258a17ae99f6148d4'
                         },
@@ -274,14 +214,106 @@
                                 rpcUrls: ['https://rpc.hyperliquid.xyz/evm'],
                                 blockExplorerUrls: ['https://explorer.hyperliquid.xyz']
                             }
-                        ],
-                        embeddedWallets: {
-                            createOnLogin: 'off'
-                        }
+                        ]
+                    });
+
+                    console.log('✅ Privy initialized successfully');
+
+                    // Listen for authentication events
+                    privyClient.on('login', (user) => {
+                        console.log('🎉 User logged in:', user);
+                        updateWalletStatus(user);
+                    });
+
+                    privyClient.on('logout', () => {
+                        console.log('👋 User logged out');
+                        updateWalletStatus(null);
+                    });
+
+                    return true;
+                } else {
+                    console.error('❌ Privy SDK not found');
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Privy initialization failed:', error);
+                return false;
+            }
+        }
+
+        // Update wallet connection status
+        function updateWalletStatus(user) {
+            const connectBtn = document.getElementById('connect-wallet');
+            const walletStatus = document.getElementById('wallet-status');
+            const connectedAddress = document.getElementById('connected-address');
+
+            if (user && user.wallet) {
+                isConnected = true;
+                connectBtn.textContent = `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`;
+                connectBtn.style.background = '#10b981';
+                if (connectedAddress) {
+                    connectedAddress.textContent = `Connected: ${user.wallet.address}`;
+                }
+                if (walletStatus) {
+                    walletStatus.style.display = 'block';
+                }
+            } else {
+                isConnected = false;
+                connectBtn.textContent = 'Connect Wallet';
+                connectBtn.style.background = 'linear-gradient(135deg, #2dd4bf, #14b8a6)';
+                if (walletStatus) {
+                    walletStatus.style.display = 'none';
+                }
+            }
+        }
+
+        // Fallback MetaMask connection
+        async function connectMetaMask() {
+            try {
+                if (typeof window.ethereum !== 'undefined') {
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts.length > 0) {
+                        updateWalletStatus({ wallet: { address: accounts[0] } });
+                        return true;
                     }
-                },
-                React.createElement(PrivyWalletConnect)
-            );
+                } else {
+                    alert('Please install MetaMask or use a Web3 browser');
+                }
+                return false;
+            } catch (error) {
+                console.error('MetaMask connection failed:', error);
+                alert('Failed to connect wallet. Please try again.');
+                return false;
+            }
+        }
+
+        // Handle wallet connection
+        async function handleWalletConnect() {
+            if (isConnected) {
+                // Disconnect
+                if (privyClient) {
+                    await privyClient.logout();
+                } else {
+                    updateWalletStatus(null);
+                }
+                return;
+            }
+
+            // Try Privy first
+            if (privyClient) {
+                try {
+                    await privyClient.login();
+                    return;
+                } catch (error) {
+                    console.error('Privy login failed:', error);
+                }
+            }
+
+            // Fallback to MetaMask
+            await connectMetaMask();
         }
 
         // Timer functionality
@@ -304,21 +336,19 @@
         }
 
         // Initialize everything
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             // Start timer
             updateTimer();
             setInterval(updateTimer, 1000);
             
-            // Initialize Privy React app
-            setTimeout(() => {
-                if (window.PrivyReactAuth) {
-                    const root = ReactDOM.createRoot(document.getElementById('privy-root'));
-                    root.render(React.createElement(PrivyApp));
-                    console.log('✅ Privy React integration initialized');
-                } else {
-                    console.error('❌ Privy React Auth not found');
-                }
-            }, 1000);
+            // Setup connect button
+            const connectBtn = document.getElementById('connect-wallet');
+            if (connectBtn) {
+                connectBtn.addEventListener('click', handleWalletConnect);
+            }
+            
+            // Initialize Privy
+            await initializePrivy();
         });
     </script>
 
