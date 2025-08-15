@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Privy SDK -->
-    <script src="https://unpkg.com/@privy-io/js-sdk-core@0.53.3/dist/index.js"></script>
+    <!-- WalletConnect -->
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -184,84 +185,34 @@
 
     <script>
         console.log('HyperFlow Presale initialized');
-        console.log('App ID: cmebbx3i201jwif0bhy9kxh32');
-        console.log('WalletConnect: ca21cf0275758f8258a17ae99f6148d4');
+        console.log('WalletConnect Project ID: ca21cf0275758f8258a17ae99f6148d4');
         console.log('Chain: HyperEVM (999)');
 
-        let privyClient = null;
+        let web3 = null;
+        let provider = null;
         let isConnected = false;
-
-        // Initialize Privy
-        async function initializePrivy() {
-            try {
-                // Wait for SDK to load
-                await new Promise(resolve => {
-                    if (window.Privy || window.PrivyClient) {
-                        resolve();
-                    } else {
-                        const checkInterval = setInterval(() => {
-                            if (window.Privy || window.PrivyClient) {
-                                clearInterval(checkInterval);
-                                resolve();
-                            }
-                        }, 100);
-                        
-                        // Timeout after 5 seconds
-                        setTimeout(() => {
-                            clearInterval(checkInterval);
-                            resolve();
-                        }, 5000);
-                    }
-                });
-
-                const PrivySDK = window.Privy || window.PrivyClient;
-                
-                if (PrivySDK) {
-                    // Try different initialization methods
-                    if (typeof PrivySDK === 'function') {
-                        privyClient = new PrivySDK({
-                            appId: 'cmebbx3i201jwif0bhy9kxh32'
-                        });
-                    } else if (PrivySDK.initialize) {
-                        privyClient = PrivySDK.initialize('cmebbx3i201jwif0bhy9kxh32');
-                    } else if (PrivySDK.createClient) {
-                        privyClient = PrivySDK.createClient({
-                            appId: 'cmebbx3i201jwif0bhy9kxh32'
-                        });
-                    }
-
-                    console.log('✅ Privy SDK loaded:', PrivySDK);
-                    console.log('✅ Privy client created:', privyClient);
-
-                    return true;
-                } else {
-                    console.error('❌ Privy SDK not found after waiting');
-                    return false;
-                }
-            } catch (error) {
-                console.error('❌ Privy initialization failed:', error);
-                return false;
-            }
-        }
+        let userAccount = null;
 
         // Update wallet connection status
-        function updateWalletStatus(user) {
+        function updateWalletStatus(account) {
             const connectBtn = document.getElementById('connect-wallet');
             const walletStatus = document.getElementById('wallet-status');
             const connectedAddress = document.getElementById('connected-address');
 
-            if (user && user.wallet) {
+            if (account) {
                 isConnected = true;
-                connectBtn.textContent = `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`;
+                userAccount = account;
+                connectBtn.textContent = `${account.slice(0, 6)}...${account.slice(-4)}`;
                 connectBtn.style.background = '#10b981';
                 if (connectedAddress) {
-                    connectedAddress.textContent = `Connected: ${user.wallet.address}`;
+                    connectedAddress.textContent = `Connected: ${account}`;
                 }
                 if (walletStatus) {
                     walletStatus.style.display = 'block';
                 }
             } else {
                 isConnected = false;
+                userAccount = null;
                 connectBtn.textContent = 'Connect Wallet';
                 connectBtn.style.background = 'linear-gradient(135deg, #2dd4bf, #14b8a6)';
                 if (walletStatus) {
@@ -270,7 +221,7 @@
             }
         }
 
-        // Fallback MetaMask connection
+        // MetaMask connection
         async function connectMetaMask() {
             try {
                 if (typeof window.ethereum !== 'undefined') {
@@ -279,7 +230,9 @@
                     });
                     
                     if (accounts.length > 0) {
-                        updateWalletStatus({ wallet: { address: accounts[0] } });
+                        web3 = new Web3(window.ethereum);
+                        updateWalletStatus(accounts[0]);
+                        console.log('✅ MetaMask connected:', accounts[0]);
                         return true;
                     }
                 } else {
@@ -293,39 +246,139 @@
             }
         }
 
+        // WalletConnect connection
+        async function connectWalletConnect() {
+            try {
+                provider = new WalletConnectProvider.default({
+                    infuraId: "9aa3d95b3bc440fa88ea12eaa4456161",
+                    rpc: {
+                        999: "https://rpc.hyperliquid.xyz/evm"
+                    },
+                    chainId: 999,
+                    qrcode: true,
+                    qrcodeModalOptions: {
+                        mobileLinks: ["rainbow", "metamask", "argent", "trust", "imtoken", "pillar"]
+                    }
+                });
+
+                await provider.enable();
+                web3 = new Web3(provider);
+                
+                const accounts = await web3.eth.getAccounts();
+                if (accounts.length > 0) {
+                    updateWalletStatus(accounts[0]);
+                    console.log('✅ WalletConnect connected:', accounts[0]);
+                    return true;
+                }
+            } catch (error) {
+                console.error('WalletConnect failed:', error);
+                return false;
+            }
+        }
+
         // Handle wallet connection
         async function handleWalletConnect() {
             if (isConnected) {
                 // Disconnect
+                if (provider && provider.disconnect) {
+                    await provider.disconnect();
+                }
                 updateWalletStatus(null);
+                web3 = null;
+                provider = null;
                 return;
             }
 
-            // Try Privy first
-            if (privyClient) {
-                try {
-                    console.log('🚀 Attempting Privy login...');
-                    
-                    // Try different login methods based on available SDK
-                    if (privyClient.login) {
-                        await privyClient.login();
-                    } else if (privyClient.auth && privyClient.auth.wallet) {
-                        await privyClient.auth.wallet.connect();
-                    } else if (privyClient.connectWallet) {
-                        await privyClient.connectWallet();
-                    } else {
-                        console.log('No known login method found, trying MetaMask fallback');
-                        await connectMetaMask();
-                    }
-                    return;
-                } catch (error) {
-                    console.error('Privy login failed:', error);
-                }
-            }
+            // Show wallet selection modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="
+                    background: #1e293b;
+                    border-radius: 12px;
+                    padding: 24px;
+                    max-width: 400px;
+                    width: 90%;
+                    color: white;
+                    border: 1px solid #334155;
+                ">
+                    <h3 style="margin: 0 0 20px 0; color: #2dd4bf; text-align: center;">Connect Wallet</h3>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button onclick="selectWallet('metamask')" style="
+                            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+                            border: none;
+                            padding: 16px;
+                            border-radius: 8px;
+                            color: white;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        ">
+                            <span>🦊</span> MetaMask
+                        </button>
+                        <button onclick="selectWallet('walletconnect')" style="
+                            background: #3b82f6;
+                            border: none;
+                            padding: 16px;
+                            border-radius: 8px;
+                            color: white;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        ">
+                            <span>📱</span> WalletConnect
+                        </button>
+                        <button onclick="closeModal()" style="
+                            background: #64748b;
+                            border: none;
+                            padding: 16px;
+                            border-radius: 8px;
+                            color: white;
+                            font-weight: 600;
+                            cursor: pointer;
+                        ">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
 
-            // Fallback to MetaMask
-            console.log('🦊 Falling back to MetaMask...');
-            await connectMetaMask();
+            document.body.appendChild(modal);
+            window.currentModal = modal;
+        }
+
+        // Wallet selection functions
+        async function selectWallet(type) {
+            closeModal();
+            
+            if (type === 'metamask') {
+                await connectMetaMask();
+            } else if (type === 'walletconnect') {
+                await connectWalletConnect();
+            }
+        }
+
+        function closeModal() {
+            if (window.currentModal) {
+                document.body.removeChild(window.currentModal);
+                window.currentModal = null;
+            }
         }
 
         // Timer functionality
@@ -359,8 +412,7 @@
                 connectBtn.addEventListener('click', handleWalletConnect);
             }
             
-            // Initialize Privy
-            await initializePrivy();
+            console.log('✅ HyperFlow Presale ready');
         });
     </script>
 
