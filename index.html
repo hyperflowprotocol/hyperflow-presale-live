@@ -380,12 +380,12 @@
 
             const modal = document.createElement('div');
             modal.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-                    justify-content: center; z-index: 10000; font-family: Inter, sans-serif;
-                `;
-                
-                modal.innerHTML = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.9); display: flex; align-items: center;
+                justify-content: center; z-index: 10000; font-family: Inter, sans-serif;
+            `;
+            
+            modal.innerHTML = `
                     <div style="background: #1e293b; border-radius: 16px; padding: 32px; max-width: 400px; width: 90%; color: white; text-align: center;">
                         <div style="width: 48px; height: 48px; background: #2dd4bf; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🔐</div>
                         <h3 style="margin: 0 0 8px 0; color: #2dd4bf; font-size: 24px; font-weight: 600;">Connect to HyperFlow</h3>
@@ -410,11 +410,11 @@
                         </div>
                         <p style="margin: 16px 0 0 0; color: #64748b; font-size: 12px;">Protected by 🔒 privy</p>
                     </div>
-                `;
-                
-                document.body.appendChild(modal);
-                window.currentModal = modal;
-            };
+            `;
+            
+            document.body.appendChild(modal);
+            window.currentModal = modal;
+        }
             
             window.connectEmail = function() {
                 alert('Email authentication would open here in production');
