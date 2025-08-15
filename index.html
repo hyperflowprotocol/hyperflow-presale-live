@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HyperFlow Protocol - Presale</title>
+    <!-- Cache bust: 1755239361047 -->
+    <!-- Version: nxyno -->
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -12,10 +14,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        html, body {
-            overflow-x: hidden;
         }
 
         body {
@@ -47,9 +45,12 @@
             padding: 0 2rem;
         }
 
-        .logo-svg {
-            height: 40px;
-            width: auto;
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .nav-menu {
@@ -82,7 +83,6 @@
 
         .cta-button:hover {
             transform: translateY(-2px);
-            color: #0f172a !important;
         }
 
         .hero {
@@ -358,23 +358,30 @@
             margin-top: 1rem;
             display: none;
         }
+
+        .status-indicator {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1001;
+        }
     </style>
 </head>
 <body>
+    <!-- Status Indicator -->
+    <div class="status-indicator">
+        🟢 Live vnxyno
+    </div>
+
     <!-- Navigation -->
     <nav class="nav">
         <div class="nav-container">
-            <div class="logo">
-                <svg class="logo-svg" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" style="stop-color:#2dd4bf"/>
-                            <stop offset="100%" style="stop-color:#14b8a6"/>
-                        </linearGradient>
-                    </defs>
-                    <text x="10" y="35" font-family="Inter, sans-serif" font-size="28" font-weight="800" fill="url(#logoGradient)">HyperFlow</text>
-                </svg>
-            </div>
+            <div class="logo">HyperFlow Protocol</div>
             <ul class="nav-menu">
                 <li><a href="#presale">Presale</a></li>
                 <li><a href="https://hyperflowprotocol.github.io" target="_blank">Whitepaper</a></li>
@@ -512,6 +519,9 @@
     </section>
 
     <script>
+        // Cache version: nxyno
+        console.log('HyperFlow Presale vnxyno - 1755239361047');
+        
         // Wallet connection functionality
         let isConnected = false;
         let userAccount = null;
@@ -589,7 +599,7 @@
                         userAccount = accounts[0];
                         
                         // Update UI
-                        connectButton.textContent = 'Wallet Connected';
+                        connectButton.textContent = 'Wallet Connected ✓';
                         connectButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                         connectedAddress.textContent = `Connected: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
                         walletStatus.style.display = 'block';
@@ -615,7 +625,7 @@
                     if (accounts.length > 0) {
                         isConnected = true;
                         userAccount = accounts[0];
-                        connectButton.textContent = 'Wallet Connected';
+                        connectButton.textContent = 'Wallet Connected ✓';
                         connectButton.style.background = 'linear-gradient(135deg, #10b981, #059669)';
                         connectedAddress.textContent = `Connected: ${userAccount.substring(0, 6)}...${userAccount.substring(38)}`;
                         walletStatus.style.display = 'block';
@@ -627,7 +637,7 @@
         // Timer functionality
         function updateTimer() {
             const now = new Date().getTime();
-            const presaleEnd = new Date('2025-09-15').getTime(); // Example end date
+            const presaleEnd = new Date('2025-09-15').getTime();
             const timeLeft = presaleEnd - now;
 
             if (timeLeft > 0) {
@@ -645,9 +655,9 @@
 
         // Update timer every second
         setInterval(updateTimer, 1000);
-        updateTimer(); // Initial call
+        updateTimer();
 
-        console.log('HyperFlow Presale initialized successfully');
+        console.log('HyperFlow Presale initialized successfully - Cache cleared!');
     </script>
 </body>
 </html>
