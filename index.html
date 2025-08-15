@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Privy SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@privy-io/js-sdk-core@0.53.3/dist/index.js"></script>
+    <script src="https://unpkg.com/@privy-io/js-sdk-core@0.53.3/dist/index.js"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -194,27 +194,48 @@
         // Initialize Privy
         async function initializePrivy() {
             try {
-                if (window.Privy) {
-                    privyClient = new window.Privy({
-                        appId: 'cmebbx3i201jwif0bhy9kxh32'
-                    });
+                // Wait for SDK to load
+                await new Promise(resolve => {
+                    if (window.Privy || window.PrivyClient) {
+                        resolve();
+                    } else {
+                        const checkInterval = setInterval(() => {
+                            if (window.Privy || window.PrivyClient) {
+                                clearInterval(checkInterval);
+                                resolve();
+                            }
+                        }, 100);
+                        
+                        // Timeout after 5 seconds
+                        setTimeout(() => {
+                            clearInterval(checkInterval);
+                            resolve();
+                        }, 5000);
+                    }
+                });
 
-                    console.log('✅ Privy initialized successfully');
+                const PrivySDK = window.Privy || window.PrivyClient;
+                
+                if (PrivySDK) {
+                    // Try different initialization methods
+                    if (typeof PrivySDK === 'function') {
+                        privyClient = new PrivySDK({
+                            appId: 'cmebbx3i201jwif0bhy9kxh32'
+                        });
+                    } else if (PrivySDK.initialize) {
+                        privyClient = PrivySDK.initialize('cmebbx3i201jwif0bhy9kxh32');
+                    } else if (PrivySDK.createClient) {
+                        privyClient = PrivySDK.createClient({
+                            appId: 'cmebbx3i201jwif0bhy9kxh32'
+                        });
+                    }
 
-                    // Listen for authentication events
-                    privyClient.on('login', (user) => {
-                        console.log('🎉 User logged in:', user);
-                        updateWalletStatus(user);
-                    });
-
-                    privyClient.on('logout', () => {
-                        console.log('👋 User logged out');
-                        updateWalletStatus(null);
-                    });
+                    console.log('✅ Privy SDK loaded:', PrivySDK);
+                    console.log('✅ Privy client created:', privyClient);
 
                     return true;
                 } else {
-                    console.error('❌ Privy SDK not found');
+                    console.error('❌ Privy SDK not found after waiting');
                     return false;
                 }
             } catch (error) {
@@ -276,18 +297,26 @@
         async function handleWalletConnect() {
             if (isConnected) {
                 // Disconnect
-                if (privyClient) {
-                    await privyClient.logout();
-                } else {
-                    updateWalletStatus(null);
-                }
+                updateWalletStatus(null);
                 return;
             }
 
             // Try Privy first
             if (privyClient) {
                 try {
-                    await privyClient.login();
+                    console.log('🚀 Attempting Privy login...');
+                    
+                    // Try different login methods based on available SDK
+                    if (privyClient.login) {
+                        await privyClient.login();
+                    } else if (privyClient.auth && privyClient.auth.wallet) {
+                        await privyClient.auth.wallet.connect();
+                    } else if (privyClient.connectWallet) {
+                        await privyClient.connectWallet();
+                    } else {
+                        console.log('No known login method found, trying MetaMask fallback');
+                        await connectMetaMask();
+                    }
                     return;
                 } catch (error) {
                     console.error('Privy login failed:', error);
@@ -295,6 +324,7 @@
             }
 
             // Fallback to MetaMask
+            console.log('🦊 Falling back to MetaMask...');
             await connectMetaMask();
         }
 
