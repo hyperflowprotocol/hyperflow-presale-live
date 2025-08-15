@@ -415,53 +415,53 @@
             document.body.appendChild(modal);
             window.currentModal = modal;
         }
-            
-            window.connectEmail = function() {
-                alert('Email authentication would open here in production');
-                closeModal();
-            };
-            
-            window.connectGoogle = function() {
-                alert('Google OAuth would open here in production');
-                closeModal();
-            };
-            
-            window.connectDiscord = function() {
-                alert('Discord OAuth would open here in production');
-                closeModal();
-            };
-            
-            window.connectWallet = function() {
-                connectMetaMask();
-                closeModal();
-            };
-            
-            window.closeModal = function() {
-                if (window.currentModal) {
-                    document.body.removeChild(window.currentModal);
-                    window.currentModal = null;
-                }
-            };
-            
-            // MetaMask connection for wallet option
-            async function connectMetaMask() {
-                try {
-                    if (typeof window.ethereum !== 'undefined') {
-                        const accounts = await window.ethereum.request({ 
-                            method: 'eth_requestAccounts' 
-                        });
-                        
-                        if (accounts.length > 0) {
-                            updateWalletStatus({ wallet: { address: accounts[0] } });
-                            console.log('✅ MetaMask connected:', accounts[0]);
-                        }
-                    } else {
-                        alert('Please install MetaMask or use a Web3 browser');
+
+        // Modal button functions
+        window.connectEmail = function() {
+            alert('Email authentication would open here in production');
+            closeModal();
+        };
+        
+        window.connectGoogle = function() {
+            alert('Google OAuth would open here in production');
+            closeModal();
+        };
+        
+        window.connectDiscord = function() {
+            alert('Discord OAuth would open here in production');
+            closeModal();
+        };
+        
+        window.connectWallet = function() {
+            connectMetaMask();
+            closeModal();
+        };
+        
+        window.closeModal = function() {
+            if (window.currentModal) {
+                document.body.removeChild(window.currentModal);
+                window.currentModal = null;
+            }
+        };
+        
+        // MetaMask connection for wallet option
+        async function connectMetaMask() {
+            try {
+                if (typeof window.ethereum !== 'undefined') {
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    if (accounts.length > 0) {
+                        updateWalletStatus({ wallet: { address: accounts[0] } });
+                        console.log('✅ MetaMask connected:', accounts[0]);
                     }
-                } catch (error) {
-                    console.error('MetaMask connection failed:', error);
-                    alert('Failed to connect wallet. Please try again.');
+                } else {
+                    alert('Please install MetaMask or use a Web3 browser');
                 }
+            } catch (error) {
+                console.error('MetaMask connection failed:', error);
+                alert('Failed to connect wallet. Please try again.');
             }
         }
     </script>
