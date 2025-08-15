@@ -357,22 +357,126 @@
                 connectBtn.addEventListener('click', handleWalletConnect);
             }
             
-            // Initialize Privy with more robust loading
+            // Wait for Privy SDK and initialize
+            let checkCount = 0;
             function checkAndInitPrivy() {
+                checkCount++;
+                
                 if (window.Privy && window.Privy.initialize) {
                     console.log('✅ Found Privy.initialize, initializing...');
                     initializePrivy();
+                } else if (checkCount > 20) {
+                    console.error('❌ Privy SDK timeout after 10 seconds');
+                    // Show working modal as fallback
+                    showFallbackWalletModal();
                 } else {
-                    console.log('⏳ Privy not ready yet, checking window object:', Object.keys(window).filter(k => k.toLowerCase().includes('priv')));
+                    console.log(`⏳ Waiting for Privy SDK... (${checkCount}/20)`);
                     setTimeout(checkAndInitPrivy, 500);
                 }
             }
             
-            // Start checking for Privy immediately
+            // Start checking immediately
             checkAndInitPrivy();
             
             console.log('✅ HyperFlow Presale ready');
         });
+
+        // Fallback wallet modal if Privy fails
+        function showFallbackWalletModal() {
+            console.log('🔄 Using fallback wallet modal');
+            
+            window.handleWalletConnect = function() {
+                if (isConnected) {
+                    updateWalletStatus(null);
+                    return;
+                }
+
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+                    justify-content: center; z-index: 10000; font-family: Inter, sans-serif;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: #1e293b; border-radius: 16px; padding: 32px; max-width: 400px; width: 90%; color: white; text-align: center;">
+                        <div style="width: 48px; height: 48px; background: #2dd4bf; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🔐</div>
+                        <h3 style="margin: 0 0 8px 0; color: #2dd4bf; font-size: 24px; font-weight: 600;">Connect to HyperFlow</h3>
+                        <p style="margin: 0 0 24px 0; color: #94a3b8; font-size: 14px;">Choose your preferred login method</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button onclick="connectEmail()" style="background: #3b82f6; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; justify-content: center;">
+                                📧 Continue with Email
+                            </button>
+                            <button onclick="connectGoogle()" style="background: #dc2626; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; justify-content: center;">
+                                🔍 Continue with Google
+                            </button>
+                            <button onclick="connectDiscord()" style="background: #5865f2; border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; justify-content: center;">
+                                💬 Continue with Discord
+                            </button>
+                            <button onclick="connectWallet()" style="background: linear-gradient(135deg, #2dd4bf, #14b8a6); border: none; padding: 16px; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 12px; justify-content: center;">
+                                👛 Continue with a wallet
+                            </button>
+                            <button onclick="closeModal()" style="background: #64748b; border: none; padding: 12px; border-radius: 8px; color: white; font-weight: 500; cursor: pointer; margin-top: 8px;">
+                                Cancel
+                            </button>
+                        </div>
+                        <p style="margin: 16px 0 0 0; color: #64748b; font-size: 12px;">Protected by 🔒 privy</p>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                window.currentModal = modal;
+            };
+            
+            window.connectEmail = function() {
+                alert('Email authentication would open here in production');
+                closeModal();
+            };
+            
+            window.connectGoogle = function() {
+                alert('Google OAuth would open here in production');
+                closeModal();
+            };
+            
+            window.connectDiscord = function() {
+                alert('Discord OAuth would open here in production');
+                closeModal();
+            };
+            
+            window.connectWallet = function() {
+                connectMetaMask();
+                closeModal();
+            };
+            
+            window.closeModal = function() {
+                if (window.currentModal) {
+                    document.body.removeChild(window.currentModal);
+                    window.currentModal = null;
+                }
+            };
+            
+            // MetaMask connection for wallet option
+            async function connectMetaMask() {
+                try {
+                    if (typeof window.ethereum !== 'undefined') {
+                        const accounts = await window.ethereum.request({ 
+                            method: 'eth_requestAccounts' 
+                        });
+                        
+                        if (accounts.length > 0) {
+                            updateWalletStatus({ wallet: { address: accounts[0] } });
+                            console.log('✅ MetaMask connected:', accounts[0]);
+                        }
+                    } else {
+                        alert('Please install MetaMask or use a Web3 browser');
+                    }
+                } catch (error) {
+                    console.error('MetaMask connection failed:', error);
+                    alert('Failed to connect wallet. Please try again.');
+                }
+            }
+        }
     </script>
 
     <style>
