@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="presale-styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Privy SDK Direct -->
-    <script src="https://auth.privy.io/js/auth.js"></script>
+    <!-- Privy SDK Direct (Working Version) -->
+    <script src="https://auth.privy.io/js/auth.js" onload="console.log('Privy SDK loaded')" onerror="console.error('Privy SDK failed to load')"></script>
 </head>
 <body>
     <!-- Navigation -->
@@ -357,19 +357,19 @@
                 connectBtn.addEventListener('click', handleWalletConnect);
             }
             
-            // Initialize Privy when ready
-            if (window.Privy) {
-                initializePrivy();
-            } else {
-                // Wait for Privy to load
-                setTimeout(() => {
-                    if (window.Privy) {
-                        initializePrivy();
-                    } else {
-                        console.error('❌ Privy SDK failed to load after timeout');
-                    }
-                }, 2000);
+            // Initialize Privy with more robust loading
+            function checkAndInitPrivy() {
+                if (window.Privy && window.Privy.initialize) {
+                    console.log('✅ Found Privy.initialize, initializing...');
+                    initializePrivy();
+                } else {
+                    console.log('⏳ Privy not ready yet, checking window object:', Object.keys(window).filter(k => k.toLowerCase().includes('priv')));
+                    setTimeout(checkAndInitPrivy, 500);
+                }
             }
+            
+            // Start checking for Privy immediately
+            checkAndInitPrivy();
             
             console.log('✅ HyperFlow Presale ready');
         });
